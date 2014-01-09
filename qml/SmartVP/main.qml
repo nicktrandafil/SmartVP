@@ -1,16 +1,21 @@
 import QtQuick 2.0
+import "."
 
 Rectangle {
-    width: 360
-    height: 360
-    Text {
-        text: qsTr("Hello World")
-        anchors.centerIn: parent
-    }
-    MouseArea {
-        anchors.fill: parent
-        onClicked: {
-            Qt.quit();
+    id: root
+    width: Settings.windowWidth
+    height: Settings.windowHeight
+
+    Loader {
+        source: "MenuBar.qml"
+        onItemChanged: {
+            item.parent = root
+            item.systemPallete = systemPallete
+
         }
+    }
+
+    SystemPalette {
+        id: systemPallete
     }
 }
