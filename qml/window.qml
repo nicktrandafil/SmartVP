@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.1
 import QtQuick.Dialogs 1.1
+import "Logic.js" as Logic
 import "."
 
 ApplicationWindow {
@@ -34,7 +35,7 @@ ApplicationWindow {
         title: qsTr("Выберите файлы...")
         selectMultiple: true
         onAccepted: {
-            player.addFiles(fileDialog.fileUrls)
+            Logic.addFiles(fileDialog.fileUrls)
             visible = false
         }
         onRejected: {

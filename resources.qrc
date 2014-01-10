@@ -14,5 +14,8 @@
         <file>resources/icons/Previous.png</file>
         <file>qml/Button.qml</file>
         <file>resources/icons/Volume.png</file>
+        <file>qml/Logic.js</file>
+        <file>qml/Helper.qml</file>
+        <file>qml/ListModel.qml</file>
     </qresource>
 </RCC>

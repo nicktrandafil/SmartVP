@@ -2,6 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     id: button
+    property bool hover: false
     signal clicked
     property alias source: icon.source
     Image {
@@ -9,8 +10,11 @@ Rectangle {
         anchors.fill: parent
     }
     MouseArea {
+        hoverEnabled: true
         anchors.fill: parent
-        onClicked: button.onClicked()
+        onClicked: {
+            button.clicked()
+        }
         onPressed: {
             icon.anchors.leftMargin = 1;
             icon.anchors.topMargin = 1
@@ -19,5 +23,7 @@ Rectangle {
             icon.anchors.leftMargin = 0;
             icon.anchors.topMargin = 0
         }
+        onEntered: hover = true
+        onExited: hover = false
     }
 }

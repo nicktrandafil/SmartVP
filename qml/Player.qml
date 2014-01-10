@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.1
 import QtMultimedia 5.0
+import "Logic.js" as Logic
 import Helper 1.0
 import "."
 
@@ -29,8 +30,7 @@ Item {
                     id: bkgd
                     color: "black"
                     width: parent.width
-                    height: parent.height * 0.9
-                    anchors {left: parent.left; top: parent.top}
+                    anchors {top: parent.top; bottom: videoControl.top; bottomMargin: 5}
 
                     VideoOutput {
                         id: videoOutput
@@ -41,20 +41,22 @@ Item {
 
                 Rectangle {
                     id: videoControl
-                    anchors {top: bkgd.bottom; bottom: parent.bottom; topMargin: 5}
+                    anchors {bottom: parent.bottom; left: parent.left}
                     width: parent.width
+                    height: 20
 
                     Button {
                         id: previdous
                         anchors {left: parent.left; top: parent.top}
                         width: height
-                        height: parent.height / 2.
+                        height: parent.height
                         source: "qrc:///resources/icons/Previous.png"
+                        onClicked: Logic.previousMedia()
                     }
 
                     Button {
                         id: play
-                        anchors { left: previdous.right; top: parent.top; leftMargin: 10}
+                        anchors { left: previdous.right; top: parent.top; leftMargin: 5}
                         width: height
                         height: previdous.height
                         source: "qrc:///resources/icons/Play.png"
@@ -66,26 +68,40 @@ Item {
                         height: previdous.height
                         source: "qrc:///resources/icons/Next.png"
                     }
+                    Button {
+                        id: fullScreen
+                        anchors {left: next.right; top: parent.top; leftMargin: 5}
+                        width: height
+                        height: previdous.height
+                        source: "qrc:///resources/icons/FullScreen.png"
+                    }
                     Rectangle {
                         id: label
                         anchors { right: volume.right; top: parent.top; }
                         width: previdous.width * 3 + 10;
                         height: previdous.height
                     }
-                    Rectangle {
+                    Button {
                         id: volume
                         anchors { right: parent.right; top: parent.top; }
                         width: previdous.width
                         height: width
-                        Image {
-                            anchors.fill: parent
-                            source: "qrc:///resources/icons/Volume.png"
+                        source: "qrc:///resources/icons/Volume.png"
+                        onHoverChanged: if (hover) {volumeSlider.visible = true} else
+                                        {volumeSlider.visible = false}
+                        Slider {
+                            id: volumeSlider
+                            onHoveredChanged: if (hovered) {visible = true} else {visible = false}
+                            visible: false
+                            orientation: Qt.Vertical
+                            anchors {bottom: parent.top; horizontalCenter: parent.horizontalCenter}
+                            height: 80
                         }
                     }
 
                     Slider {
                         id: slider
-                        anchors { top: parent.top; left: next.right; right: label.left; rightMargin: 5; leftMargin: 5}
+                        anchors { top: parent.top; left: fullScreen.right; right: label.left; rightMargin: 5; leftMargin: 5}
                     }
                 }
             }
@@ -107,7 +123,7 @@ Item {
                         }
                     }
                 }
-                model: listModel
+                model: Logic.listModel
                 delegate: Component {
                     Rectangle {
                         id: itemBkgd
@@ -137,35 +153,17 @@ Item {
                 DropArea {
                     id: dropArea
                     anchors.fill: parent
-                    onDropped: addFiles(drop.urls)
+                    onDropped: Logic.addFiles(drop.urls)
                 }
             }
         }
-
     }
 
-    ListModel {
-        id: listModel
-    }
-
-
-    function addFiles(newFile){
-        if (newFile == null)
-            return;
-        for (var i = 0; i < newFile.length; ++i){
-            if (helper.isValidMedia(newFile[i])){
-                listModel.append({"name": helper.mediaName(newFile[i]), "path": newFile[i]})
-            }
-        }
-    }
+    Component.onCompleted: Logic.listView = listView
 
     function quit(){
         mediaPlayer.stop();
         Qt.quit();
-    }
-
-    Helper {
-        id: helper
     }
 }
 

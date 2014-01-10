@@ -2,3 +2,5 @@ singleton Settings 1.0 Settings.qml
 MenuBar 1.0 MenuBar.qml
 Player 1.0 Player.qml
 Button 1.0 Button.qml
+Helper 1.0 Helper.qml
+ListModel 1.0 ListModel.qml
