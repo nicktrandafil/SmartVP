@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/MenuBar.qml</file>
+        <file>qml/Settings.qml</file>
+        <file>qml/window.qml</file>
+        <file>qml/qmldir</file>
+        <file>qml/Player.qml</file>
+        <file>resources/videoFormats.txt</file>
+        <file>resources/icons/FullScreen.png</file>
+        <file>resources/icons/MinScreen.png</file>
+        <file>resources/icons/Next.png</file>
+        <file>resources/icons/Pause.png</file>
+        <file>resources/icons/Play.png</file>
+        <file>resources/icons/Previous.png</file>
+        <file>qml/Button.qml</file>
+        <file>resources/icons/Volume.png</file>
+    </qresource>
+</RCC>

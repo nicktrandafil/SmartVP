@@ -1,19 +1,34 @@
-# Add more folders to ship with the application, here
-folder_01.source = qml/SmartVP
+TEMPLATE = app
+
+folder_01.source = qml
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
-# Additional import path used to resolve QML modules in Creator's code model
-QML_IMPORT_PATH =
+QT += quick qml
+SOURCES += main.cpp \
+    helper.cpp
+RESOURCES += \
+    resources.qrc
 
-# The .cpp file which was generated for your project. Feel free to hack it.
-SOURCES += main.cpp
+target = SmartVP
+INSTALLS += target
 
-# Installation path
-# target.path =
+for(deploymentfolder, DEPLOYMENTFOLDERS) {
+    item = item$${deploymentfolder}
+    greaterThan(QT_MAJOR_VERSION, 4) {
+        itemsources = $${item}.files
+    } else {
+        itemsources = $${item}.sources
+    }
+    $$itemsources = $$eval($${deploymentfolder}.source)
+    itempath = $${item}.path
+    $$itempath= $$eval($${deploymentfolder}.target)
+    export($$itemsources)
+    export($$itempath)
+    DEPLOYMENT += $$item
+}
 
-# Please do not modify the following two lines. Required for deployment.
-include(qtquick2applicationviewer/qtquick2applicationviewer.pri)
-qtcAddDeployment()
+HEADERS += \
+    helper.h
 
 OTHER_FILES +=
