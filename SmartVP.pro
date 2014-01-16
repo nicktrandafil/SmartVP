@@ -31,4 +31,5 @@ for(deploymentfolder, DEPLOYMENTFOLDERS) {
 HEADERS += \
     helper.h
 
-OTHER_FILES +=
+OTHER_FILES += \
+    resources/About.txt

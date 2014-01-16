@@ -1,12 +1,12 @@
 .pragma library
+.import QtQuick.Window 2.1 as Window
 
-var component = Qt.createComponent("Helper.qml");
-var helper = component.createObject();
-
-component = Qt.createComponent("ListModel.qml");
-var listModel = component.createObject();
-
+var helper;
+var listModel;
 var listView;
+var mediaPlayer;
+var mainWindow;
+var messageBox;
 
 function addFiles(newFile){
     if (newFile == null)
@@ -18,11 +18,50 @@ function addFiles(newFile){
     }
 }
 
+function quit(){
+    mediaPlayer.stop();
+    Qt.quit();
+}
+
+
 function previousMedia(){
-    console.log(listView.currentIndex);
+    var index = listView.playIndex;
+    if (index < 0)
+        return;
+    if (index == 0){
+        listView.playIndex = listView.count - 1;
+        return;
+    }
+    listView.playIndex = listView.playIndex - 1;
 }
 
 function nextMedia(){
-
+    var index = listView.playIndex;
+    if (index < 0)
+        return;
+    if (index == listView.count - 1){
+        listView.playIndex = 0;
+        return;
+    }
+    listView.playIndex = listView.playIndex + 1;
 }
 
+function setMedia(index){
+    mediaPlayer.source = listModel.get(index).path;
+    listView.currentIndex = index;
+}
+
+function playMedia(){
+    mediaPlayer.stop();
+    mediaPlayer.source = listModel.get(listView.playIndex).path;
+    mediaPlayer.play();
+}
+
+function information(title, text){
+    if (messageBox == null){
+        messageBox = Qt.createQmlObject('import "."; MessageBox {id: messageBox}', mainWindow, "messagebox");
+    }
+    messageBox.title = title;
+    messageBox.text = text;
+    messageBox.visible = true;
+}

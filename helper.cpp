@@ -2,6 +2,9 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QUrl>
+#include <QTime>
+#include <QFile>
+#include <QTextStream>
 
 #ifdef QT_DEBUG
 #include <QDebug>
@@ -48,4 +51,36 @@ QString Helper::mediaName(const QUrl &path)
     if (!fileInfo.exists())
         return "";
     return fileInfo.fileName();
+}
+
+QString Helper::duration(qint64 currentInfo, qint64 totalInfo)
+{
+    QString tStr;
+    QTime currentTime((currentInfo/3600)%60, (currentInfo/60)%60, currentInfo%60, (currentInfo*1000)%1000);
+    QTime totalTime((totalInfo/3600)%60, (totalInfo/60)%60, totalInfo%60, (totalInfo*1000)%1000);
+    QString format = "mm:ss";
+    if (totalInfo > 3600)
+        format = "hh:mm:ss";
+    tStr = currentTime.toString(format) + " / " + totalTime.toString(format);
+    return tStr;
+}
+
+QString Helper::newDuration(qint64 currentInfo)
+{
+    QString tStr;
+    QTime currentTime((currentInfo/3600)%60, (currentInfo/60)%60, currentInfo%60, (currentInfo*1000)%1000);
+    QString format = "mm:ss";
+    if (currentInfo > 3600)
+        format = "hh:mm:ss";
+    tStr = currentTime.toString(format);
+    return tStr;
+}
+
+QString Helper::readFile(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly))
+        return "";
+    QTextStream inf(&file);
+    return inf.readAll();
 }

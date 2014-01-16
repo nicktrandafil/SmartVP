@@ -15,7 +15,8 @@
         <file>qml/Button.qml</file>
         <file>resources/icons/Volume.png</file>
         <file>qml/Logic.js</file>
-        <file>qml/Helper.qml</file>
-        <file>qml/ListModel.qml</file>
+        <file>resources/icons/Mute.png</file>
+        <file>qml/MessageBox.qml</file>
+        <file>resources/About.txt</file>
     </qresource>
 </RCC>
