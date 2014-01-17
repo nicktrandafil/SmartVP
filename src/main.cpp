@@ -5,7 +5,6 @@
 #include <QtCore/QUrl>
 #include <QDebug>
 #include "helper.h"
-#include "actionpack.h"
 #include "motiondetectorwrapper.h"
 #include "motiondetector.h"
 #include <QSharedPointer>
@@ -16,7 +15,6 @@ int main(int argc, char* argv[])
 
     QQmlEngine engine;
     qmlRegisterType<Helper>("Helper", 1, 0, "Helper");
-    //qmlRegisterType<ActionPack>("ActionPack", 1, 0, "ActionPack");
     qmlRegisterType<MotionDetectorWrapper>("MotionDetectorWrapper", 1, 0, "MotionDetectorWrapper");
     qmlRegisterType<MotionDetector>("MotionDetectorWrapper", 1, 0, "MotionDetector");
     QQmlComponent component(&engine);

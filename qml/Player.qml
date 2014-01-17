@@ -4,6 +4,7 @@ import QtMultimedia 5.0
 import "Logic.js" as Logic
 import QtQuick.Window 2.1
 import Helper 1.0
+import MotionDetectorWrapper 1.0
 import "."
 
 Item {
@@ -188,6 +189,7 @@ Item {
                         id: positionSlider
                         anchors { top: parent.top; left: fullScreenButton.right; right: label.left; leftMargin: 5; rightMargin: 5}
                         maximumValue: mediaPlayer.duration
+                        value: mediaPlayer.position
                         onValueChanged: {
                             if (pressed) {
                                 mediaPlayer.seek(value);
@@ -304,6 +306,9 @@ Item {
             id: fullScreenWindowContent
             anchors.fill: parent
         }
+    }
+    MotionDetectorWrapper {
+        id: md
     }
 }
 

@@ -6,8 +6,6 @@
 #include <QVector>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-#include "actionpack.h"
-
 
 class QTimerEvent;
 
@@ -18,6 +16,7 @@ class Stick
 {
 public:
     explicit Stick();
+    ~Stick();
 
     //Properties
     cv::Point top() const;
@@ -40,7 +39,8 @@ class SeriesAnaliser : public QObject
     Q_OBJECT
 public:
     explicit SeriesAnaliser(QObject * parent = 0);
-    ActionPack analize(const QVector<QPair<double, double> > &source);
+    ~SeriesAnaliser();
+    QString analize(const QVector<QPair<double, double> > &source);
     double deltaTime() const;
     void setDeltaTime(double framesPerSec);
 
@@ -49,7 +49,7 @@ private:
 
 private:
     double m_framesPerSec;
-    ActionPack m_actionPack;
+    QString m_actionPack;
     //linear
 };
 
@@ -74,7 +74,7 @@ private:
 protected:
     void timerEvent(QTimerEvent *event);                    // Следит за камерой. Вызвает observCap
 signals:
-    void sendAction(const ActionPack &);                    // Отправляет рашифрованное действие
+    void sendAction(const QString &);                    // Отправляет рашифрованное действие
 public slots:
     void beginSession(bool begin);                                    // Начать наблюдение за камерой
     void setMinH(int v);
@@ -108,7 +108,7 @@ private:
     int m_minH, m_minS, m_minV, m_maxH, m_maxS, m_maxV;
     bool m_heavyFilter;
 
-    ActionPack m_actionPack;
+    QString m_actionPack;
 
     bool m_showImage;
     int m_camId;

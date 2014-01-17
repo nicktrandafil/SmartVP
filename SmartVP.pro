@@ -5,8 +5,10 @@ folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
 QT += quick qml
-SOURCES += main.cpp \
-    helper.cpp
+SOURCES += src/main.cpp \
+    src/helper.cpp \
+    src/motiondetector.cpp \
+    src/motiondetectorwrapper.cpp
 RESOURCES += \
     resources.qrc
 
@@ -29,7 +31,16 @@ for(deploymentfolder, DEPLOYMENTFOLDERS) {
 }
 
 HEADERS += \
-    helper.h
+    src/helper.h \
+    src/motiondetector.h \
+    src/motiondetectorwrapper.h
 
 OTHER_FILES += \
     resources/About.txt
+
+linux {
+    INCLUDEPATH += /home/nick/Development/opencv-2.4
+    LIBS += -L/home/nick/Development/opencv-2.4/lib \
+        -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d \
+        -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -lopencv_flann -lopencv_nonfree
+}

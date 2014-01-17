@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QTime>
 #include <string>
+#include <QtQml>
 
 #ifdef QT_DEBUG
 #include <QDebug>
@@ -11,7 +12,17 @@
 //Hand class
 Stick::Stick()
 {
+#ifdef QT_DEBUG
+    qDebug() << "Stick created";
+#endif
     // nothing to do
+}
+
+Stick::~Stick()
+{
+#ifdef QT_DEBUG
+    qDebug() << "Stick deleted";
+#endif
 }
 cv::Point Stick::top() const
 {
@@ -43,13 +54,16 @@ MotionDetector::MotionDetector(QObject *parent) :
     m_showImage(false),
     m_camId(0)
 {
-    // Type Registrations
-    qRegisterMetaType<ActionPack>("ActionPack");
+#ifdef QT_DEBUG
+    qDebug() << "MotionDetector created";
+#endif
 }
 
 MotionDetector::~MotionDetector()
 {
-    // qDebug() << "MotionDetector deleted";
+#ifdef QT_DEBUG
+    qDebug() << "MotionDetecot deleted";
+#endif
 }
 
 void MotionDetector::beginSession(bool begin)
@@ -199,7 +213,7 @@ void MotionDetector::detectStick()
         m_pointSeries.append(QPair<double, double>(m_stick.top().x, m_stick.top().y));
         if (m_pointSeries.size() >= 10){
             m_actionPack = m_pSeriesAnaliser.analize(m_pointSeries);
-            if (m_actionPack.isValid()){
+            if (!m_actionPack.isEmpty()){
                 emit sendAction(m_actionPack);
             }
             m_pointSeries.clear();
@@ -239,15 +253,23 @@ void MotionDetector::timerEvent(QTimerEvent *event)
     observCam();
 }
 
-
 SeriesAnaliser::SeriesAnaliser(QObject *parent) : QObject(parent), m_framesPerSec(30)
 {
-    // nothing to do
+#ifdef QT_DEBUG
+    qDebug() << "SeriesAnaliser created";
+#endif
 }
 
-ActionPack SeriesAnaliser::analize(const QVector<QPair<double, double> > &source)
+SeriesAnaliser::~SeriesAnaliser()
 {
-    m_actionPack = ActionPack();
+#ifdef QT_DEBUG
+    qDebug() << "SeriesAnaliser deleted";
+#endif
+}
+
+QString SeriesAnaliser::analize(const QVector<QPair<double, double> > &source)
+{
+    m_actionPack.clear();
     if (linerCheck(source)){
         return m_actionPack;
     }
@@ -327,28 +349,30 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
         // Переключение0
         if (a < 0){
             // Следующая дорожка
-            m_actionPack.setAction(ActionPack::AC_NEXT);
+            m_actionPack = "next";
         } else{
             if (speed < 0)
-                m_actionPack.setAction(ActionPack::AC_PLAY);
+                m_actionPack = "play";
             else
                 // Предыдущая дорожка
-                m_actionPack.setAction(ActionPack::AC_PREVIOUS);
+                m_actionPack = "previous";
         }
     } else
         if (qAbs(a) < 0.3)
         {
-            m_actionPack.setAction(ActionPack::AC_REWIND);
-            m_actionPack.setDelta(speed * -30);
+            m_actionPack = QString("rewind %1").arg(speed * -30);
         } else
             if (qAbs(a) > 5){
-                m_actionPack.setAction(ActionPack::AC_VOLUME);
-                m_actionPack.setDelta(speed * -30);
+                m_actionPack = QString("volue %1").arg(speed * -30);
             } else
                 return false;
 
     return true;
 }
+/*Протокол общения
+ * next, previous, play, rewind delta, volume delta
+ */
+
 double SeriesAnaliser::deltaTime() const
 {
     return m_framesPerSec;

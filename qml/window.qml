@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.1
 import QtQuick.Dialogs 1.1
 import "Logic.js" as Logic
+import Helper 1.0
 import "."
 
 ApplicationWindow {
