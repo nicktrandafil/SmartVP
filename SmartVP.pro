@@ -4,7 +4,7 @@ folder_01.source = qml
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
-QT += quick qml multimedia
+QT += quick qml multimedia widgets
 
 SOURCES += src/main.cpp \
     src/helper.cpp \

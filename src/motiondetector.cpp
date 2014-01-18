@@ -53,9 +53,9 @@ MotionDetector::MotionDetector(QObject *parent) :
     m_heavyFilter(false),
     m_showImage(false),
     m_camId(0),
-    m_maxH(0),
-    m_maxS(0),
-    m_maxV(0),
+    m_maxH(255),
+    m_maxS(255),
+    m_maxV(255),
     m_minH(111),
     m_minS(160),
     m_minV(122)

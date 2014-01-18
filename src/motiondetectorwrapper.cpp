@@ -23,6 +23,7 @@ MotionDetectorWrapper::MotionDetectorWrapper(QObject *parent) :
 
 MotionDetectorWrapper::~MotionDetectorWrapper()
 {
+    cv::destroyAllWindows();
 #ifdef QT_DEBUG
     qDebug() << "MotionDetecotWrapper deleted";
 #endif
@@ -33,6 +34,13 @@ MotionDetectorWrapper::~MotionDetectorWrapper()
 void MotionDetectorWrapper::beginSession(bool begin)
 {
     QMetaObject::invokeMethod(m_motionDetector, "beginSession", Q_ARG(bool, begin));
+}
+
+void MotionDetectorWrapper::showDetection(bool show)
+{
+    if (show)
+        cv::namedWindow("bin");
+    m_motionDetector->setShowImage(show);
 }
 
 MotionDetector *MotionDetectorWrapper::motionDetector() const

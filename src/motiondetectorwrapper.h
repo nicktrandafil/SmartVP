@@ -16,6 +16,7 @@ public:
     ~MotionDetectorWrapper();
 
     Q_INVOKABLE void beginSession(bool begin);
+    Q_INVOKABLE void showDetection(bool show);
 
     MotionDetector *motionDetector() const;
     void setMotionDetector(MotionDetector *motionDetector);

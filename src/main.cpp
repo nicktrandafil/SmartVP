@@ -1,4 +1,5 @@
-#include <QtGui/QGuiApplication>
+//#include <QtGui/QGuiApplication>
+#include <QApplication>
 #include <QtQml/QQmlEngine>
 #include <QtQml/QQmlComponent>
 #include <QtQuick/QQuickWindow>
@@ -11,7 +12,8 @@
 
 int main(int argc, char* argv[])
 {
-    QGuiApplication app(argc, argv);
+    //QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     QQmlEngine engine;
     qmlRegisterType<Helper>("Helper", 1, 0, "Helper");

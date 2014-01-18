@@ -34,13 +34,11 @@ MenuBar {
             checkable: true
             onCheckedChanged: Logic.md.beginSession(checked)
         }
-        /*
         MenuItem {
             text: qsTr("Камера")
             checkable: true
             onCheckedChanged: Logic.md.showDetection(checked)
         }
-        */
     }
     Menu {
         title: qsTr("&Помощь")

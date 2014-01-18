@@ -38,7 +38,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         onPositionChanged: if (fullScreenWindow.visible) {
-                                               videoControl.height = 20;
+                                               videoControl.height = Settings.videoControl;
                                                screenEvents.cursorShape = Qt.ArrowCursor;
                                                videoControlHidder.restart();
                                            }
@@ -64,7 +64,7 @@ Item {
                     Behavior on height { SpringAnimation { spring: 2; damping: 0.2 } }
                     anchors {bottom: parent.bottom; left: parent.left}
                     width: parent.width
-                    height: 20
+                    height: Settings.videoControl
                     Button {
                         id: previdousButton
                         anchors {left: parent.left; top: parent.top}
