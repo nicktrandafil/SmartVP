@@ -4,7 +4,8 @@ folder_01.source = qml
 folder_01.target = qml
 DEPLOYMENTFOLDERS = folder_01
 
-QT += quick qml
+QT += quick qml multimedia
+
 SOURCES += src/main.cpp \
     src/helper.cpp \
     src/motiondetector.cpp \

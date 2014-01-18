@@ -5,6 +5,7 @@
 #include <QTime>
 #include <QFile>
 #include <QTextStream>
+#include <QtMultimedia/QCamera>
 
 #ifdef QT_DEBUG
 #include <QDebug>
@@ -16,6 +17,7 @@ Helper::Helper(QObject *parent) :
 #ifdef QT_DEBUG
     qDebug() << "Helper created";
 #endif
+
     // Чтение виде форматов
     QFile file(":resources/videoFormats.txt");
     if (!file.open(QFile::ReadOnly)){
@@ -24,7 +26,6 @@ Helper::Helper(QObject *parent) :
 #endif
         return;
     }
-
     QTextStream inf(&file);
     QString format;
     inf >> format;
@@ -35,6 +36,17 @@ Helper::Helper(QObject *parent) :
         if (!format.isEmpty())
             format.remove(0, 1);
     }
+
+    // Обноружене установленных камер
+    QList<QByteArray> listDevice = QCamera::availableDevices();
+        for (int i = 0; i < listDevice.size(); ++i){
+            int j = listDevice[i].size();
+            QString number;
+            while (std::isdigit(listDevice[i][--j]))
+                number += listDevice[i][j];
+            m_devices.append(QCamera::deviceDescription(listDevice[i]));
+            m_devices.append(number);
+        }
 }
 
 Helper::~Helper()
@@ -93,4 +105,15 @@ QString Helper::readFile(const QString &path)
         return "";
     QTextStream inf(&file);
     return inf.readAll();
+}
+
+const QStringList Helper::devices() const
+{
+    return m_devices;
+}
+
+void Helper::setDevices(const QStringList &devices)
+{
+    m_devices = devices;
+    emit devicesChanged();
 }

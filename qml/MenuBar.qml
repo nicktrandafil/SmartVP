@@ -6,6 +6,7 @@ MenuBar {
     id: menuBar
     signal openFile
     signal quit
+    signal openVideoSettings
 
     Menu {
         title: qsTr("&Файл")
@@ -23,9 +24,23 @@ MenuBar {
     Menu {
         title: qsTr("&Управление")
         MenuItem {
+            text: qsTr("&Настройки")
+            onTriggered: menuBar.openVideoSettings()
+        }
+
+        MenuItem {
             text: qsTr("&Ручное управление");
             shortcut: "Ctrl+H"
+            checkable: true
+            onCheckedChanged: Logic.md.beginSession(checked)
         }
+        /*
+        MenuItem {
+            text: qsTr("Камера")
+            checkable: true
+            onCheckedChanged: Logic.md.showDetection(checked)
+        }
+        */
     }
     Menu {
         title: qsTr("&Помощь")
@@ -35,7 +50,7 @@ MenuBar {
         }
         MenuItem {
             text: qsTr("&Справка...")
-
+            shortcut: "F1"
         }
     }
 }

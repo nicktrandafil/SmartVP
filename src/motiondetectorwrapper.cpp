@@ -14,6 +14,8 @@ MotionDetectorWrapper::MotionDetectorWrapper(QObject *parent) :
 #ifdef QT_DEBUG
     qDebug() << "MotionDetecotWrapper created";
 #endif
+    connect(m_motionDetector, SIGNAL(sendAction(QString)), SIGNAL(sendAction(QString)));
+
     connect(m_thread, SIGNAL(finished()), m_motionDetector, SLOT(deleteLater()));
     m_motionDetector->moveToThread(m_thread);
     m_thread->start();
@@ -27,6 +29,12 @@ MotionDetectorWrapper::~MotionDetectorWrapper()
     m_thread->quit();
     m_thread->deleteLater();
 }
+
+void MotionDetectorWrapper::beginSession(bool begin)
+{
+    QMetaObject::invokeMethod(m_motionDetector, "beginSession", Q_ARG(bool, begin));
+}
+
 MotionDetector *MotionDetectorWrapper::motionDetector() const
 {
     return m_motionDetector;

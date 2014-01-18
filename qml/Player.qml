@@ -3,7 +3,6 @@ import QtQuick.Controls 1.1
 import QtMultimedia 5.0
 import "Logic.js" as Logic
 import QtQuick.Window 2.1
-import Helper 1.0
 import MotionDetectorWrapper 1.0
 import "."
 
@@ -72,28 +71,17 @@ Item {
                         width: height
                         height: parent.height
                         source: "qrc:///resources/icons/Previous.png"
-                        onClicked: if (mediaPlayer.position > 3000) Logic.playMedia(); else Logic.previousMedia()
+                        onClicked: if (mediaPlayer.position > 3000) Logic.replayMedia(); else Logic.previousMedia()
                     }
                     Button {
                         id: playButton
-                        state: "Pausing"
                         anchors { left: previdousButton.right; top: parent.top; leftMargin: 5}
                         width: height
                         height: previdousButton.height
-                        source: "qrc:///resources/icons/Play.png"
-                        onClicked: {if (state == "Playing") {mediaPlayer.pause()} else
-                                if (state == "Pausing") {mediaPlayer.play()};
-                        }
-                        states: [
-                            State {name: "Playing"; PropertyChanges {target: playButton; source: "qrc:///resources/icons/Pause.png"}},
-                            State {name: "Pausing"; PropertyChanges {target: playButton; source: "qrc:///resources/icons/Play.png"}}
-                        ]
-                        Connections {
-                            target: mediaPlayer
-                            onPaused: playButton.state = "Pausing"
-                            onPlaying: playButton.state = "Playing"
-                            onStopped: {}
-                        }
+                        source: mediaPlayer.playbackState == 2 ? "qrc:///resources/icons/Play.png" :
+                                                                mediaPlayer.playbackState == 1 ? "qrc:///resources/icons/Pause.png" :
+                                                                                    "qrc:///resources/icons/Play.png"
+                        onClicked: Logic.playMedia()
                     }
                     Button {
                         id: nextButton
@@ -157,7 +145,7 @@ Item {
                         }
                         Connections {
                             target: mediaPlayer
-                            onPositionChanged: duratinInfo.text = helper.duration(mediaPlayer.position / 1000,
+                            onPositionChanged: duratinInfo.text = Logic.helper.duration(mediaPlayer.position / 1000,
                                                                                   mediaPlayer.duration / 1000)
                         }
                     }
@@ -194,7 +182,7 @@ Item {
                             if (pressed) {
                                 mediaPlayer.seek(value);
                                 newPosition.x = width /  mediaPlayer.duration * mediaPlayer.position;
-                                newPosition.text = helper.newDuration(width /  mediaPlayer.duration * mediaPlayer.position);
+                                newPosition.text = Logic.helper.newDuration(mediaPlayer.position / 1000);
                             }
                         }
                         Text {
@@ -211,7 +199,7 @@ Item {
                             hoverEnabled: true
                             onPositionChanged: {
                                 newPosition.x = mouse.x;
-                                newPosition.text = helper.newDuration((mediaPlayer.duration / width * mouse.x) / 1000);
+                                newPosition.text = Logic.helper.newDuration((mediaPlayer.duration / width * mouse.x) / 1000);
                             }
                         }
                     }
@@ -283,22 +271,19 @@ Item {
                 }
                 Connections {
                     target: listView
-                    onPlayIndexChanged: Logic.playMedia()
+                    onPlayIndexChanged: Logic.replayMedia()
                 }
             }
         }
     }
     Component.onCompleted: {
         Logic.listView = listView;
-        Logic.helper = helper;
         Logic.listModel = listModel;
         Logic.mediaPlayer = mediaPlayer;
+        Logic.md = md;
     }
     ListModel{
         id: listModel
-    }
-    Helper{
-        id: helper
     }
     Window {
         id: fullScreenWindow
@@ -309,6 +294,10 @@ Item {
     }
     MotionDetectorWrapper {
         id: md
+        onSendAction: Logic.executeComand(action)
     }
+
+    // Блок жестового управления
+
 }
 

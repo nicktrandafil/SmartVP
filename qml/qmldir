@@ -3,3 +3,4 @@ MenuBar 1.0 MenuBar.qml
 Player 1.0 Player.qml
 Button 1.0 Button.qml
 MessageBox 1.0 MessageBox.qml
+VideoSettings 1.0 VideoSettings.qml

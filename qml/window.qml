@@ -19,6 +19,7 @@ ApplicationWindow {
         id: menuBar
         onOpenFile: fileDialog.visible = true
         onQuit: Logic.quit()
+        onOpenVideoSettings: videoSettings.visible = true
     }
     Player {
         id: player
@@ -37,8 +38,16 @@ ApplicationWindow {
             visible = false;
         }
     }
+    VideoSettings {
+        id: videoSettings
+    }
+
     SystemPalette {
         id: systemPallete
     }
-    Component.onCompleted: Logic.mainWindow = mainWindow
+    Component.onCompleted: {
+        Logic.mainWindow = mainWindow;
+        Logic.helper = Qt.createQmlObject('import Helper 1.0; Helper{id: helper}', mainWindow, "helper");
+        videoSettings.initModel();
+    }
 }

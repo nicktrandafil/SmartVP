@@ -74,7 +74,7 @@ private:
 protected:
     void timerEvent(QTimerEvent *event);                    // Следит за камерой. Вызвает observCap
 signals:
-    void sendAction(const QString &);                    // Отправляет рашифрованное действие
+    void sendAction(const QString & action);                    // Отправляет рашифрованное действие
 public slots:
     void beginSession(bool begin);                                    // Начать наблюдение за камерой
     void setMinH(int v);

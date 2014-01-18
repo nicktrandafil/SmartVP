@@ -18,5 +18,6 @@
         <file>resources/icons/Mute.png</file>
         <file>qml/MessageBox.qml</file>
         <file>resources/About.txt</file>
+        <file>qml/VideoSettings.qml</file>
     </qresource>
 </RCC>

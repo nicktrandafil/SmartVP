@@ -1,12 +1,13 @@
 .pragma library
 .import QtQuick.Window 2.1 as Window
 
-var helper;
 var listModel;
 var listView;
 var mediaPlayer;
 var mainWindow;
 var messageBox;
+var helper;
+var md;
 
 function addFiles(newFile){
     if (newFile == null)
@@ -51,10 +52,26 @@ function setMedia(index){
     listView.currentIndex = index;
 }
 
-function playMedia(){
+function replayMedia(){
     mediaPlayer.stop();
     mediaPlayer.source = listModel.get(listView.playIndex).path;
     mediaPlayer.play();
+}
+
+function playMedia(){
+    switch (mediaPlayer.playbackState){
+    case 0:
+        mediaPlayer.play();
+        break;
+    case 1:
+        mediaPlayer.pause();
+        break;
+    case 2:
+        mediaPlayer.play();
+        break;
+    default:
+        break;
+    }
 }
 
 function information(title, text){
@@ -64,4 +81,27 @@ function information(title, text){
     messageBox.title = title;
     messageBox.text = text;
     messageBox.visible = true;
+}
+
+function executeComand(comand){
+    var comandList = comand.split(' ');
+    switch (comandList[0]) {
+    case "next":
+        nextMedia();
+        break;
+    case "previous":
+        previousMedia();
+        break;
+    case "play":
+        playMedia();
+        break;
+    case "rewind":
+        mediaPlayer.seek(mediaPlayer.position + Number(comandList[1]));
+        break;
+    case "volume":
+        mediaPlayer.volume += Number(comandList[1]);
+        break;
+    default:
+        break;
+    }
 }
