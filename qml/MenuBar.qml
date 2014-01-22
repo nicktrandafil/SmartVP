@@ -7,6 +7,7 @@ MenuBar {
     signal openFile
     signal quit
     signal openVideoSettings
+    signal chooseColor
 
     Menu {
         title: qsTr("&Файл")
@@ -33,6 +34,32 @@ MenuBar {
             shortcut: "Ctrl+H"
             checkable: true
             onCheckedChanged: Logic.md.beginSession(checked)
+        }
+        Menu {
+            title: qsTr("Цвет")
+            MenuItem {
+                text: qsTr("Оранжевый")
+                onTriggered: {
+                    Logic.md.motionDetector.setMinH(value);
+                    Logic.md.motionDetector.setMinS(value);
+                    Logic.md.motionDetector.setMinV(value);
+                    Logic.md.motionDetector.setMaxV(value);
+                    Logic.md.motionDetector.setMaxV(value);
+                    Logic.md.motionDetector.setMaxV(value);
+                }
+            }
+            MenuItem {
+                text: qsTr("Оранжевый")
+                onTriggered: {
+
+                }
+            }
+
+            MenuSeparator {}
+            MenuItem {
+                text: qsTr("Выбрать цвет...")
+                onTriggered: menuBar.chooseColor()
+            }
         }
         MenuItem {
             text: qsTr("Камера")

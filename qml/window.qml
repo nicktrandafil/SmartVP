@@ -20,6 +20,7 @@ ApplicationWindow {
         onOpenFile: fileDialog.visible = true
         onQuit: Logic.quit()
         onOpenVideoSettings: videoSettings.visible = true
+        onChooseColor: colorSettings.visible = true
     }
     Player {
         id: player
@@ -40,6 +41,9 @@ ApplicationWindow {
     }
     VideoSettings {
         id: videoSettings
+    }
+    ColorSettings {
+        id: colorSettings
     }
 
     SystemPalette {

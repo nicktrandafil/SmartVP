@@ -1,15 +1,19 @@
-import QtQuick 2.0
+import QtQuick 2.2
+import QtQuick.Controls 1.1
+import "Tooltip.js" as Tooltip
 
 Rectangle {
     id: button
-    property bool hover: false
+    property bool hovered: mouseArea.containsMouse
+    property alias iconSource: icon.source
     signal clicked
-    property alias source: icon.source
+
     Image {
         id: icon
         anchors.fill: parent
     }
     MouseArea {
+        id: mouseArea
         hoverEnabled: true
         anchors.fill: parent
         onClicked: {
@@ -23,7 +27,16 @@ Rectangle {
             icon.anchors.leftMargin = 0;
             icon.anchors.topMargin = 0
         }
-        onEntered: hover = true
-        onExited: hover = false
+        onEntered: {
+            Tooltip.fadeInDelay = 500;
+            Tooltip.fadeOutDelay = 700;
+            Tooltip.tip = "This is tooltip!";
+            Tooltip.mainWindow = button
+            console.log(mouseArea.mouseX)
+            Tooltip.show();
+        }
+        onExited: {
+            Tooltip.close();
+        }
     }
 }

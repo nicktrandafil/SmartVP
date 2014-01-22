@@ -19,5 +19,13 @@
         <file>qml/MessageBox.qml</file>
         <file>resources/About.txt</file>
         <file>qml/VideoSettings.qml</file>
+        <file>qml/ColorSettings.qml</file>
+        <file>resources/icons/Delete.png</file>
+        <file>resources/icons/Add.png</file>
+        <file>resources/icons/Up.png</file>
+        <file>resources/icons/Down.png</file>
+        <file>resources/icons/DeleteAll.png</file>
+        <file>qml/Tooltip.js</file>
+        <file>qml/Tooltip.qml</file>
     </qresource>
 </RCC>
