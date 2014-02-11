@@ -10,6 +10,7 @@ import "."
 Item {
     id: player
     property SystemPalette systemPallete
+    signal addFiles
     SplitView {
         id: splitView
         anchors.fill: parent
@@ -68,6 +69,7 @@ Item {
                     height: Settings.videoControl
                     Button {
                         id: previdousButton
+                        tooltip: qsTr("Предыдущая дорожка/Рестарт")
                         anchors {left: parent.left; top: parent.top}
                         width: height
                         height: parent.height
@@ -76,6 +78,7 @@ Item {
                     }
                     Button {
                         id: playButton
+                        tooltip: qsTr("Играть")
                         anchors { left: previdousButton.right; top: parent.top; leftMargin: 5}
                         width: height
                         height: previdousButton.height
@@ -86,6 +89,7 @@ Item {
                     }
                     Button {
                         id: nextButton
+                        tooltip: qsTr("Следующая дорожка")
                         anchors { left: playButton.right; top: parent.top; leftMargin: 5}
                         width: height
                         height: previdousButton.height
@@ -94,6 +98,7 @@ Item {
                     }
                     Button {
                         id: fullScreenButton
+                        tooltip: qsTr("Полноэкранный/обычный режимы")
                         state: "MinScreen"
                         anchors {left: nextButton.right; top: parent.top; leftMargin: 5}
                         width: height
@@ -153,12 +158,23 @@ Item {
                     }
                     Button {
                         id: volumeButton
+                        tooltip: qsTr("Громкость")
+                        property var temp
                         anchors { right: parent.right; top: parent.top; leftMargin: 5}
                         width: previdousButton.width
                         height: width
                         iconSource: "qrc:///resources/icons/Volume.png"
                         onHoveredChanged: if (hovered) {volumeSlider.visible = true} else
                                         {volumeSlider.visible = false}
+                        onClicked: if (state == "Mute")
+                                       volumeSlider.value = temp;
+                        else
+                                   {
+                                       temp = volumeSlider.value;
+                                       volumeSlider.value = 0;
+                                   }
+
+
                         Slider {
                             id: volumeSlider
                             style: SliderStyle {}
@@ -170,10 +186,17 @@ Item {
                             orientation: Qt.Vertical
                             anchors {bottom: parent.top; horizontalCenter: parent.horizontalCenter}
                             height: 80
-                            onValueChanged: mediaPlayer.volume = value
+                            onValueChanged: {
+                                mediaPlayer.volume = value;
+                                if (value == 0)
+                                    volumeButton.state = "Mute";
+                                else
+                                    volumeButton.state = "Normal"
+                            }
                         }
                         states: [
-                            State {name: "Mute"; PropertyChanges{target: volumeButton; iconSource: "qrc:///resources/icons/Mute.png"}}
+                            State {name: "Mute"; PropertyChanges{target: volumeButton; iconSource: "qrc:///resources/icons/Mute.png"}},
+                            State {name: "Normal"; PropertyChanges{target: volumeButton; iconSource: "qrc:///resources/icons/Volume.png"}}
                         ]
                     }
                     Slider {
@@ -261,8 +284,12 @@ Item {
                 }
                 highlight: highlight
                 highlightFollowsCurrentItem: true
-                focus: true
+                focus: !fullScreenWindow.visible
                 Keys.onReturnPressed: {listView.playIndex = listView.currentIndex}
+                Keys.onSpacePressed: if (mediaPlayer.playbackState == 1)
+                                         mediaPlayer.pause();
+                else
+                                         mediaPlayer.play()
                 DropArea {
                     id: dropArea
                     anchors.fill: parent
@@ -294,38 +321,49 @@ Item {
                 height: Settings.videoControl
                 Button {
                     id: addTrackButton
+                    tooltip: qsTr("Добавить файлы")
                     anchors {left: parent.left; top: parent.top; leftMargin: 5}
                     width: height
                     height: parent.height
                     iconSource: "qrc:///resources/icons/Add.png"
+                    onClicked: player.addFiles()
                 }
                 Button {
                     id: deleteTrackButton
+                    tooltip: qsTr("Удалить файл")
                     anchors {left: addTrackButton.right; top: parent.top; leftMargin: 5}
                     width: addTrackButton.width
                     height: width
                     iconSource: "qrc:///resources/icons/Delete.png"
+                    onClicked: Logic.removeTrack();
                 }
                 Button {
                     id: upTrackButton
+                    tooltip: qsTr("Переместить файл на верх по списку")
                     anchors {left: deleteTrackButton.right; top: parent.top; leftMargin: 5}
                     width: addTrackButton.width
                     height: width
                     iconSource: "qrc:///resources/icons/Up.png"
+                    onClicked: if (listModel.count > 1) Logic.curTrackUp()
                 }
                 Button {
                     id: downTrackButton
+                    tooltip: qsTr("Переместить файл вниз по списку")
                     anchors {left: upTrackButton.right; top: parent.top; leftMargin: 5}
                     width: addTrackButton.width
                     height: width
                     iconSource: "qrc:///resources/icons/Down.png"
+                    onClicked: if (listModel.count > 1) Logic.curTrackDown()
                 }
                 Button {
                     id: deleteAllTrackButton
-                    anchors {right: parent.right; top: parent.top}
+                    tooltip: qsTr("Удалить все файлы")
+                    anchors {right: parent.right; top: parent.top; rightMargin: 5}
+                    //anchors {left: downTrackButton.right; top: parent.top; leftMargin: 5}
                     width: addTrackButton.width
                     height: width
                     iconSource: "qrc:///resources/icons/DeleteAll.png"
+                    onClicked: listModel.clear()
                 }
             }
         }
@@ -344,14 +382,14 @@ Item {
         Item {
             id: fullScreenWindowContent
             anchors.fill: parent
+            Keys.onEscapePressed: fullScreenWindow.visible = false
+            focus: fullScreenWindow.visible
         }
     }
     MotionDetectorWrapper {
         id: md
         onSendAction: Logic.executeComand(action)
     }
-
     // Блок жестового управления
-
 }
 

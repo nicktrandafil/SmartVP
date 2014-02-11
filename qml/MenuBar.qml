@@ -8,6 +8,15 @@ MenuBar {
     signal quit
     signal openVideoSettings
     signal chooseColor
+    signal about
+    signal help
+    signal handControl(var b)
+    signal camera(var b)
+
+    function initColors(text){
+        Logic.updateColors(colorMenu, text);
+        Logic.initColors(colorMenu);
+    }
 
     Menu {
         title: qsTr("&Файл")
@@ -33,49 +42,34 @@ MenuBar {
             text: qsTr("&Ручное управление");
             shortcut: "Ctrl+H"
             checkable: true
-            onCheckedChanged: Logic.md.beginSession(checked)
+            onCheckedChanged: menuBar.handControl(checked)
         }
         Menu {
+            id: colorMenu
             title: qsTr("Цвет")
-            MenuItem {
-                text: qsTr("Оранжевый")
-                onTriggered: {
-                    Logic.md.motionDetector.setMinH(value);
-                    Logic.md.motionDetector.setMinS(value);
-                    Logic.md.motionDetector.setMinV(value);
-                    Logic.md.motionDetector.setMaxV(value);
-                    Logic.md.motionDetector.setMaxV(value);
-                    Logic.md.motionDetector.setMaxV(value);
-                }
-            }
-            MenuItem {
-                text: qsTr("Оранжевый")
-                onTriggered: {
-
-                }
-            }
-
-            MenuSeparator {}
+            MenuSeparator {objectName: "separator"}
             MenuItem {
                 text: qsTr("Выбрать цвет...")
                 onTriggered: menuBar.chooseColor()
             }
+            Component.onCompleted: Logic.initColors(colorMenu)
         }
         MenuItem {
             text: qsTr("Камера")
             checkable: true
-            onCheckedChanged: Logic.md.showDetection(checked)
+            onCheckedChanged: menuBar.camera(checked)
         }
     }
     Menu {
         title: qsTr("&Помощь")
         MenuItem {
             text: qsTr("О &программе...")
-            onTriggered: {Logic.information(qsTr("О программе"), Logic.helper.readFile(":resources/About.txt"));}
+            onTriggered: menuBar.about()
         }
         MenuItem {
             text: qsTr("&Справка...")
             shortcut: "F1"
+            onTriggered: menuBar.help()
         }
     }
 }

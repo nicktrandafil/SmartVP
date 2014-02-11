@@ -15,8 +15,8 @@ MotionDetectorWrapper::MotionDetectorWrapper(QObject *parent) :
     qDebug() << "MotionDetecotWrapper created";
 #endif
     connect(m_motionDetector, SIGNAL(sendAction(QString)), SIGNAL(sendAction(QString)));
-
     connect(m_thread, SIGNAL(finished()), m_motionDetector, SLOT(deleteLater()));
+
     m_motionDetector->moveToThread(m_thread);
     m_thread->start();
 }
@@ -27,6 +27,7 @@ MotionDetectorWrapper::~MotionDetectorWrapper()
 #ifdef QT_DEBUG
     qDebug() << "MotionDetecotWrapper deleted";
 #endif
+    QMetaObject::invokeMethod(m_motionDetector, "beginSession", Qt::BlockingQueuedConnection, Q_ARG(bool, false));
     m_thread->quit();
     m_thread->deleteLater();
 }
@@ -40,7 +41,7 @@ void MotionDetectorWrapper::showDetection(bool show)
 {
     if (show)
         cv::namedWindow("bin");
-    m_motionDetector->setShowImage(show);
+    QMetaObject::invokeMethod(m_motionDetector, "setShowImage", Q_ARG(bool, show));
 }
 
 MotionDetector *MotionDetectorWrapper::motionDetector() const

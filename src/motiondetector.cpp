@@ -43,7 +43,7 @@ void Stick::setBottom(const cv::Point &bottom)
     m_bottom = bottom;
 }
 
-//MotionDetector class
+// MotionDetector class
 MotionDetector::MotionDetector(QObject *parent) :
     QObject(parent),
     m_state(ST_WAITING),
@@ -53,14 +53,6 @@ MotionDetector::MotionDetector(QObject *parent) :
     m_heavyFilter(false),
     m_showImage(false),
     m_camId(0),
-    /*
-    m_maxH(255),
-    m_maxS(255),
-    m_maxV(255),
-    m_minH(111),
-    m_minS(160),
-    m_minV(122)
-    */
     m_maxH(0),
     m_maxS(0),
     m_maxV(0),
@@ -86,28 +78,22 @@ void MotionDetector::beginSession(bool begin)
         m_cap.open(m_camId);
         m_obserTimId = startTimer(m_framesPerSec);
     } else{
-        killTimer(m_obserTimId);
+        if (m_obserTimId != -1)
+            killTimer(m_obserTimId);
         m_obserTimId = -1;
-        //очистка за собой
+        // убираем за собой
         m_pointSeries.clear();
         m_cap.release();
-        m_obserTimId = -1;
         m_frame.release();
         m_hsv.release();
         m_binIm.release();
         m_contours.clear();
-        //cv::destroyAllWindows();
     }
 }
 
 void MotionDetector::observCam()
 {
     m_cap >> m_frame;
-
-    //converting to HSV type
-    m_hsv = m_frame.clone();
-    m_binIm = m_frame.clone();
-    cv::cvtColor(m_frame, m_hsv, CV_RGB2HSV);
     filterIm();
     detectStick();
     drawStick(m_frame);
@@ -115,40 +101,13 @@ void MotionDetector::observCam()
     showIms();
 }
 
-void MotionDetector::setMinH(int v)
-{
-    m_minH = v;
-}
-
-void MotionDetector::setMinS(int v)
-{
-    m_minS = v;
-}
-
-void MotionDetector::setMinV(int v)
-{
-    m_minV = v;
-}
-
-void MotionDetector::setMaxH(int v)
-{
-    m_maxH = v;
-}
-
-void MotionDetector::setMaxS(int v)
-{
-    m_maxS = v;
-}
-
-void MotionDetector::setMaxV(int v)
-{
-    m_maxV = v;
-}
-
-void MotionDetector::setHeavyFilter(bool v)
-{
-    m_heavyFilter = v;
-}
+void MotionDetector::setMinH(int v) {m_minH = v;}
+void MotionDetector::setMinS(int v) {m_minS = v;}
+void MotionDetector::setMinV(int v) {m_minV = v;}
+void MotionDetector::setMaxH(int v) {m_maxH = v;}
+void MotionDetector::setMaxS(int v) {m_maxS = v;}
+void MotionDetector::setMaxV(int v) {m_maxV = v;}
+void MotionDetector::setHeavyFilter(bool v) {m_heavyFilter = v;}
 
 void MotionDetector::setShowImage(bool show)
 {
@@ -171,8 +130,13 @@ void MotionDetector::resetCam(int camId)
 
 void MotionDetector::filterIm()
 {
+    m_hsv = m_frame.clone();
+    m_binIm = m_frame.clone();
+    cv::cvtColor(m_frame, m_hsv, CV_RGB2HSV);
+
     // работаем с m_hsv изображением, в результате получаем m_binIm
     cv::inRange(m_hsv, cv::Scalar(m_minH, m_minS, m_minV), cv::Scalar(m_maxH, m_maxS, m_maxV), m_binIm);
+
     if (m_heavyFilter){
         cv::Mat erodeElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
         cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(8, 8));
@@ -192,13 +156,13 @@ void MotionDetector::detectStick()
     bool stickFound = false;
     for(int i = 0; i < m_contours.size(); ++i)
     {
-        // если объект не очень маленький
+        // если объект очень маленький, то пропускаем его
         if(cv::contourArea(m_contours[i]) < m_arAtThreshold)
             continue;
 
+        // находим концы карандаша
         m_stickRect = cv::minAreaRect(m_contours[i]);
         cv::Point2f vertices[4];
-
         cv::Point top;
         cv::Point bottom;
         m_stickRect.points(vertices);
@@ -234,7 +198,6 @@ void MotionDetector::detectStick()
         }
         break;
     case ST_WAITING:
-        //if (qAbs(m_stick.bottom().x - m_stick.top().x) < 20)
         m_state = ST_OBSERVING;
         break;
     }
@@ -294,16 +257,19 @@ QString SeriesAnaliser::analize(const QVector<QPair<double, double> > &source)
 bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
 {
     int count = source.size();
+
+    // скопируем значения в 2 отдельных массива, чтобы понятнее было.
     QVector<double> x(count);
     QVector<double> y(count);
+
     for (int i = 0; i < count; ++i){
         x[i] = source[i].first;
         y[i] = source[i].second;
     }
 
-    double zX, zY, zX2, zXY;
+    double zX, zY, zX2, zXY;    // z - обнозначение знака суммы. zX - сумма x-ов и т.д.
     QVector<double> yT(count);
-    // Подготовка переданных
+    // подготовка переданных
     zX = 0;
     for (int i = 0; i < count; ++i)
         zX += x[i];
@@ -320,11 +286,11 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
     for (int i = 0; i < count; ++i)
         zXY += x[i] * y[i];
 
-    // Вычисление уравнения
+    // вычисление коэффициетов уравнения
     double a = (count * zXY - zX * zY) / (count * zX2 - zX * zX);
     double b = (zX2 * zY - zX * zXY) / (count * zX2 - zX * zX);
 
-    // нахождение теоретических данных
+    // нахождение теоретического y
     for (int i = 0; i < count; ++i)
         yT[i] = x[i] * a + b;
 
@@ -335,49 +301,60 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
     if (a == 0)
         a = 10;
 
+#ifdef QT_DEBUG
+    qDebug() << QString("%1x+%2").arg(a).arg(b);
+    qDebug() << dif;
+#endif
+
+    // если а > 3, то это, сокорее всего, вертикальная линия
+    // если погрешность больше 70, то это, скорее всего, случайное движение
+    // если 0.5 < a < 1.5, то это, скорее всего, косая линия
+    // если скорость больше 0.6, то это, скорее всего, случайное движеие
+
     // Если погрешность очень большая, то выход
-    if (qAbs(a) < 4 && dif > 60)
+    if (qAbs(a) < 3 && dif > 70)
         return false;
 
+    // вычисление скорости
     double msInFrame = 1000 / m_framesPerSec;
     double dTime = msInFrame * count;   // ms
     double dDistance;                   // px
     double speed = 0;  /*px per ser*/
-    if (qAbs(a) < 4)
-        dDistance = x[count - 1] - x[0];
+    if (qAbs(a) < 3)
+        dDistance = x[count - 1] - x[0];            // если вертикальная линия
     else
         dDistance = y[count -1] - y[0];
     speed = dDistance / dTime; //px per
 
-    // Если палочка не двигается, выход
+    // если палочка не двигается, выход
     if (qSqrt(qPow(x[0] - x[count - 1], 2) + qPow(y[0] - y[count - 1], 2)) < 15){
         return false;
     }
 
-    // Резкие движения вероятно случайные.
+    // резкие движения вероятно случайные.
     if (speed > 0.6)
         return false;
 
     // отправка пакета
-    if (qAbs(a) > 0.7 && qAbs(a) < 1.3){
-        // Переключение0
+    if (qAbs(a) > 0.5 && qAbs(a) < 1.5){
+        // Переключение
         if (a < 0){
-            // Следующая дорожка
+            // следующая дорожка
             m_actionPack = "next";
         } else{
             if (speed < 0)
                 m_actionPack = "play";
             else
-                // Предыдущая дорожка
+                // предыдущая дорожка
                 m_actionPack = "previous";
         }
     } else
         if (qAbs(a) < 0.3)
         {
-            m_actionPack = QString("rewind %1").arg(speed * -30);
+            m_actionPack = QString("rewind %1").arg(speed * -30000);
         } else
-            if (qAbs(a) > 5){
-                m_actionPack = QString("volue %1").arg(speed * -30);
+            if (qAbs(a) > 3){
+                m_actionPack = QString("volume %1").arg(speed * -1);
             } else
                 return false;
 
@@ -396,5 +373,3 @@ void SeriesAnaliser::setDeltaTime(double framesPerSec)
 {
     m_framesPerSec = framesPerSec;
 }
-
-

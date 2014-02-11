@@ -25,7 +25,6 @@
         <file>resources/icons/Up.png</file>
         <file>resources/icons/Down.png</file>
         <file>resources/icons/DeleteAll.png</file>
-        <file>qml/Tooltip.js</file>
-        <file>qml/Tooltip.qml</file>
+        <file>resources/Help.txt</file>
     </qresource>
 </RCC>

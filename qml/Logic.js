@@ -8,6 +8,8 @@ var mainWindow;
 var messageBox;
 var helper;
 var md;
+var colorSettings;
+//var
 
 function addFiles(newFile){
     if (newFile == null)
@@ -85,6 +87,7 @@ function information(title, text){
 
 function executeComand(comand){
     var comandList = comand.split(' ');
+    console.log(comand);
     switch (comandList[0]) {
     case "next":
         nextMedia();
@@ -99,9 +102,86 @@ function executeComand(comand){
         mediaPlayer.seek(mediaPlayer.position + Number(comandList[1]));
         break;
     case "volume":
+        console.log("before" + mediaPlayer.volume);
         mediaPlayer.volume += Number(comandList[1]);
+        console.log("after" + mediaPlayer.volume);
         break;
     default:
         break;
     }
 }
+
+function removeTrack(){
+    listModel.remove(listView.currentIndex);
+}
+
+function curTrackUp(){
+    if (listView.currentIndex == 0){
+        swapTracks(0, listView.count - 1);
+        return;
+    }
+    swapTracks(listView.currentIndex, listView.currentIndex - 1);
+}
+
+function curTrackDown(){
+    if (listView.currentItem == listView.count - 1){
+        swapTracks(listView.count - 1, 0);
+        return;
+    }
+    swapTracks(listView.currentIndex, listView.currentIndex + 1)
+}
+
+function swapTracks(id1, id2){
+    var temp;
+    temp = deepCopy(listModel.get(id1), temp);
+    listModel.set(id1, listModel.get(id2));
+    listModel.set(id2, temp);
+}
+
+function deepCopy(p, c) {
+    var c = c || {};
+    for (var i in p) {
+        if (typeof p[i] === 'object') {
+            c[i] = (p[i].constructor === Array) ? [] : {};
+            deepCopy(p[i], c[i]);
+        } else {
+            c[i] = p[i];
+        }
+    }
+    return c;
+}
+
+function initColors(menu){
+    while (menu.items[0].objectName != "separator")
+        menu.removeItem(menu.items[0]);
+    var stringList = helper.readColors("resources/Colors.txt");
+    for (var i = 0; i < stringList.length; ++i){
+        var number = stringList[i].split(' ');
+        var name = number[0];
+        var minH = number[1];
+        var minS = number[2];
+        var minV = number[3];
+        var maxH = number[4];
+        var maxS = number[5];
+        var maxV = number[6];
+        var item = menu.insertItem(0, number[0]);
+        var action =
+        Qt.createQmlObject(String('import QtQuick.Controls 1.1; import "Logic.js" as Logic; Action {' +
+                'text: "%1";' +
+                'onTriggered: {' +
+                    'Logic.colorSettings.minH = %2;' +
+                    'Logic.colorSettings.minS = %3;' +
+                    'Logic.colorSettings.minV = %4;' +
+                    'Logic.colorSettings.maxH = %5;' +
+                    'Logic.colorSettings.maxS = %6;' +
+                    'Logic.colorSettings.maxV = %7;' +
+                '}' +
+            '}').arg(name).arg(minH).arg(minS).arg(minV).arg(maxH).arg(maxS).arg(maxV), item, "messagebox");
+        item.action = action;
+    }
+}
+
+function updateColors(menu, content){
+    helper.updateColors("resources/Colors.txt", content);
+}
+

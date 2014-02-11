@@ -3,6 +3,7 @@ import QtQuick.Window 2.1
 import QtQuick.Controls 1.1
 import QtQuick.Controls.Styles 1.1
 import "Logic.js" as Logic
+import QtQuick.Dialogs 1.1
 
 Window {
     id: window
@@ -10,6 +11,15 @@ Window {
     minimumWidth: 600
     modality: Qt.ApplicationModal
     title: qsTr("Настройки цвета")
+
+    property alias minH: minHSlider.value
+    property alias minS: minSSlider.value
+    property alias minV: minVSlider.value
+    property alias maxH: maxHSlider.value
+    property alias maxS: maxSSlider.value
+    property alias maxV: maxVSlider.value
+
+    signal initColors(var text)
 
     Label {
         id: minHLabel
@@ -54,7 +64,6 @@ Window {
         width: minSLabel.width
         text: minSSlider.value
     }
-
     Label {
         id: minVLabel
         anchors {margins: 10; left: parent.left; top: minSLabel.bottom}
@@ -147,5 +156,55 @@ Window {
         anchors {margins: 10; bottom: parent.bottom; right: parent.right}
         text: "Ok"
         onClicked: {window.visible = false}
+        focus: true
+        Keys.onReturnPressed: ok.clicked()
+    }
+    Button {
+        id: save
+        anchors {margins: 10; bottom: parent.bottom; right: ok.left}
+        text: qsTr("Добавить в меню")
+        onClicked: inputDialog.visible = true
+    }
+    Window {
+        id: inputDialog
+        modality: Qt.ApplicationModal
+        title: qsTr("Название цвета")
+        width: 400
+        height: 80
+        Item {
+            anchors.fill: parent
+            Keys.onReturnPressed: accept.clicked();
+            Keys.onEscapePressed: reject.clicked();
+            focus: true
+            Label {
+                id: textInputLabel
+                text: qsTr("Введие название цвета: ")
+                width: paintedWidth
+                height: paintedHeight
+                anchors {margins: 10; left: parent.left; top: parent.top}
+            }
+            Rectangle {
+                height: textInputLabel.height + 2
+                anchors { left: textInputLabel.right; right: parent.right; verticalCenter: textInputLabel.verticalCenter; margins: 10 }
+                border.width: 1
+                TextInput {
+                    id: textInput
+                    anchors { fill: parent; leftMargin: 2; rightMargin: 2 }
+                }
+            }
+            Button {
+                id: accept
+                anchors {margins: 10; bottom: parent.bottom; right: parent.right}
+                text: "Ok"
+                onClicked: {window.initColors(textInput.text + String(" %1 %2 %3 %4 %5 %6").arg(minH).arg(minS).arg(minV).arg(maxH).arg(maxS).arg(maxV));
+                    inputDialog.visible = false}
+            }
+            Button {
+                id: reject
+                anchors { margins: 10; bottom: parent.bottom; right: accept.left }
+                text: qsTr("Отмена")
+                onClicked: inputDialog.visible = false
+            }
+        }
     }
 }

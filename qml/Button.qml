@@ -1,42 +1,24 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
-import "Tooltip.js" as Tooltip
+import QtQuick.Controls.Styles 1.1
 
-Rectangle {
+Button {
     id: button
-    property bool hovered: mouseArea.containsMouse
-    property alias iconSource: icon.source
-    signal clicked
-
-    Image {
-        id: icon
-        anchors.fill: parent
-    }
-    MouseArea {
-        id: mouseArea
-        hoverEnabled: true
-        anchors.fill: parent
-        onClicked: {
-            button.clicked()
+    style: ButtonStyle {
+        background: Item {
+            Image {
+                id: bkgdIm
+                anchors.fill: parent
+                source: button.iconSource
+                Connections {
+                    target: button
+                    onPressedChanged: {
+                        if (button.pressed) {bkgdIm.anchors.leftMargin = 1; bkgdIm.anchors.topMargin = 1;} else
+                            {bkgdIm.anchors.leftMargin = 0; bkgdIm.anchors.topMargin = 0}
+                    }
+                }
+            }
         }
-        onPressed: {
-            icon.anchors.leftMargin = 1;
-            icon.anchors.topMargin = 1
-        }
-        onReleased: {
-            icon.anchors.leftMargin = 0;
-            icon.anchors.topMargin = 0
-        }
-        onEntered: {
-            Tooltip.fadeInDelay = 500;
-            Tooltip.fadeOutDelay = 700;
-            Tooltip.tip = "This is tooltip!";
-            Tooltip.mainWindow = button
-            console.log(mouseArea.mouseX)
-            Tooltip.show();
-        }
-        onExited: {
-            Tooltip.close();
-        }
+        label: Item {}
     }
 }

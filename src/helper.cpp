@@ -17,8 +17,7 @@ Helper::Helper(QObject *parent) :
 #ifdef QT_DEBUG
     qDebug() << "Helper created";
 #endif
-
-    // Чтение виде форматов
+    // Чтение видео форматов
     QFile file(":resources/videoFormats.txt");
     if (!file.open(QFile::ReadOnly)){
 #ifdef QT_DEBUG
@@ -39,14 +38,14 @@ Helper::Helper(QObject *parent) :
 
     // Обноружене установленных камер
     QList<QByteArray> listDevice = QCamera::availableDevices();
-        for (int i = 0; i < listDevice.size(); ++i){
-            int j = listDevice[i].size();
-            QString number;
-            while (std::isdigit(listDevice[i][--j]))
-                number += listDevice[i][j];
-            m_devices.append(QCamera::deviceDescription(listDevice[i]));
-            m_devices.append(number);
-        }
+    for (int i = 0; i < listDevice.size(); ++i){
+        int j = listDevice[i].size();
+        QString number;
+        while (std::isdigit(listDevice[i][--j]))
+            number += listDevice[i][j];
+        m_devices.append(QCamera::deviceDescription(listDevice[i]));
+        m_devices.append(number);
+    }
 }
 
 Helper::~Helper()
@@ -56,7 +55,7 @@ Helper::~Helper()
 #endif
 }
 
-bool Helper::isValidMedia(const QUrl &path)
+bool Helper::isValidMedia(const QUrl &path) const
 {
     QFileInfo fileInfo(path.path());
     if (!fileInfo.exists())
@@ -75,6 +74,7 @@ QString Helper::mediaName(const QUrl &path)
     return fileInfo.fileName();
 }
 
+// длительность для метки слева от ползунка длительности
 QString Helper::duration(qint64 currentInfo, qint64 totalInfo)
 {
     QString tStr;
@@ -87,6 +87,7 @@ QString Helper::duration(qint64 currentInfo, qint64 totalInfo)
     return tStr;
 }
 
+// определение длительности, когда курсор нахдится над ползунков длительности
 QString Helper::newDuration(qint64 currentInfo)
 {
     QString tStr;
@@ -107,13 +108,53 @@ QString Helper::readFile(const QString &path)
     return inf.readAll();
 }
 
+QStringList Helper::readColors(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly))
+        return QStringList();
+
+    QStringList sl;             // первый элемент название цвета, остальные 6 hsv
+    QTextStream inf(&file);
+    QString temp = inf.readLine();
+
+    while (!temp.isEmpty()){    // пока есть строки в файле
+        QStringList tTemp = temp.split(' ');
+        int i = 0;
+        for (i = 0; i < tTemp.size(); ++i){
+            bool ok;
+            tTemp[i].toDouble(&ok);
+            if (ok)
+                break;
+        }
+        QString name = tTemp[0];
+        tTemp.removeFirst();
+        for (int j = 0; j < i - 1; ++j){
+            name += "_" + tTemp[0];
+            tTemp.removeFirst();
+        }
+        sl << (name + " " + tTemp.join(' '));
+        temp = inf.readLine();
+    }
+    file.close();
+    return sl;
+}
+
+void Helper::updateColors(const QString &path, const QString &content)
+{
+    QFile file(path);
+    if (!file.open(QFile::Append)){
+#ifdef QT_DEBUG
+        qDebug() << file.errorString();
+#endif
+        return;
+    }
+    QTextStream outf(&file);
+    outf << content << endl;
+    file.close();
+}
+
 const QStringList Helper::devices() const
 {
     return m_devices;
-}
-
-void Helper::setDevices(const QStringList &devices)
-{
-    m_devices = devices;
-    emit devicesChanged();
 }

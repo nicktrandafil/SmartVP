@@ -2,16 +2,13 @@
 #define MOTIONDETECTOR_H
 
 #include <QObject>
-#include <vector>
 #include <QVector>
+#include <vector>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
 class QTimerEvent;
 
-/********************************
- **********Stick class************
- *******************************/
 class Stick
 {
 public:
@@ -29,10 +26,6 @@ private:
     cv::Point m_top;
     cv::Point m_bottom;
 };
-
-/***************************************
- *********Action Pcackig class**********
- **************************************/
 
 class SeriesAnaliser : public QObject
 {
@@ -54,15 +47,14 @@ private:
 };
 
 /* Класс котороый работает с камерой. Он собирает серию изображений и
- * анализирует эту серию, возможно, в дальнейшем можно придумать обучающийся класс,
- * который делает анализ */
+ * анализирует эту серию.
+*/
 class MotionDetector : public QObject
 {
     Q_OBJECT
 public:
     explicit MotionDetector(QObject *parent = 0);
     ~MotionDetector();
-
     enum State{ST_WAITING, ST_OBSERVING};
 private:
     void observCam();           // Наблюдает за камерой
@@ -90,7 +82,7 @@ public slots:
 private:
     State m_state;
     SeriesAnaliser m_pSeriesAnaliser;
-    int m_arAtThreshold;  // AreaAtentionThreshold - площадь объектов, на которые обращает внимаетие детектор
+    int m_arAtThreshold;                              // AreaAtentionThreshold - площадь объектов, на которые обращает внимаетие детектор
     QVector<QPair<double, double> > m_pointSeries;    // Серия картинок, нужно для расшифровки движеия
     cv::VideoCapture m_cap;
 

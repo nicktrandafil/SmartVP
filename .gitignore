@@ -1,8 +1,18 @@
-# C++ objects and libs
+# для файлов без расширений, т.е для исполняемых вайлов в linux
+*
+!*.*
+!*/
+
+# для windows
+*.exe
+
 *~
 build*/
 Android/android/
+libs/
+notApp/
 
+# C++ objects and libs
 *.slo
 *.lo
 *.o
@@ -21,3 +31,12 @@ moc_*.cpp
 qrc_*.cpp
 Makefile
 *-build-*
+*.autosave
+resources/minimal-media-player-icons.jpg
+
+# Для стронних библиотек
+*.so.*
+
+# Файлы убунту
+.fuse_hidden*
+
