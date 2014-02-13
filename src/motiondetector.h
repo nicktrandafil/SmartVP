@@ -14,14 +14,10 @@ class Stick
 public:
     explicit Stick();
     ~Stick();
-
-    //Properties
     cv::Point top() const;
     void setTop(const cv::Point &top);
-
     cv::Point bottom() const;
     void setBottom(const cv::Point &bottom);
-
 private:
     cv::Point m_top;
     cv::Point m_bottom;
@@ -33,22 +29,15 @@ class SeriesAnaliser : public QObject
 public:
     explicit SeriesAnaliser(QObject * parent = 0);
     ~SeriesAnaliser();
-    QString analize(const QVector<QPair<double, double> > &source);
-    double deltaTime() const;
-    void setDeltaTime(double framesPerSec);
+    static QString analize(const QVector<QPair<double, double> > &source);
+private:
+    static bool linerCheck(const QVector<QPair<double, double> > &source);
 
 private:
-    bool linerCheck(const QVector<QPair<double, double> > &source);
-
-private:
-    double m_framesPerSec;
-    QString m_actionPack;
-    //linear
+    static double s_fps;
+    static QString s_actionPack;
 };
 
-/* Класс котороый работает с камерой. Он собирает серию изображений и
- * анализирует эту серию.
-*/
 class MotionDetector : public QObject
 {
     Q_OBJECT
@@ -56,17 +45,6 @@ public:
     explicit MotionDetector(QObject *parent = 0);
     ~MotionDetector();
     enum State{ST_WAITING, ST_OBSERVING};
-private:
-    void observCam();           // Наблюдает за камерой
-    void filterIm();            // Подготавливает hsv картинку. результат - bin картинка
-    void detectStick();         // Обноружатель палочки
-    void showIms();
-    void drawStick(cv::Mat & im);
-    double lineLength(const cv::Point2f & p1, const cv::Point2f & p2) const;
-protected:
-    void timerEvent(QTimerEvent *event);                    // Следит за камерой. Вызвает observCap
-signals:
-    void sendAction(const QString & action);                    // Отправляет рашифрованное действие
 public slots:
     void beginSession(bool begin);                                    // Начать наблюдение за камерой
     void setMinH(int v);
@@ -75,13 +53,21 @@ public slots:
     void setMaxH(int v);
     void setMaxS(int v);
     void setMaxV(int v);
-    void setHeavyFilter(bool v);
     void setShowImage(bool show);
     void resetCam(int camId);
-
+signals:
+    void sendAction(const QString & action);                    // Отправляет рашифрованное действие
+private:
+    void observCam();           // Наблюдает за камерой
+    void filterIm();            // Подготавливает hsv картинку. результат - bin картинка
+    void detectStick();         // Обноружатель палочки
+    void showIms() const;
+    void drawStick(cv::Mat & im);
+    double lineLength(const cv::Point2f & p1, const cv::Point2f & p2) const;
+protected:
+    void timerEvent(QTimerEvent *event);                    // Следит за камерой. Вызвает observCap
 private:
     State m_state;
-    SeriesAnaliser m_pSeriesAnaliser;
     int m_arAtThreshold;                              // AreaAtentionThreshold - площадь объектов, на которые обращает внимаетие детектор
     QVector<QPair<double, double> > m_pointSeries;    // Серия картинок, нужно для расшифровки движеия
     cv::VideoCapture m_cap;
@@ -90,15 +76,14 @@ private:
     cv::Mat m_hsv;
     cv::Mat m_binIm;
 
-    int m_framesPerSec;
-    int m_obserTimId;
+    int m_observeTimInterval;
+    int m_observeTimId;
 
     std::vector<std::vector<cv::Point> > m_contours;
     Stick m_stick;
     cv::RotatedRect m_stickRect;
 
     int m_minH, m_minS, m_minV, m_maxH, m_maxS, m_maxV;
-    bool m_heavyFilter;
 
     QString m_actionPack;
 

@@ -9,7 +9,6 @@ import "."
 
 Item {
     id: player
-    property SystemPalette systemPallete
     signal addFiles
     SplitView {
         id: splitView

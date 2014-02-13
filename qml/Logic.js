@@ -102,9 +102,14 @@ function executeComand(comand){
         mediaPlayer.seek(mediaPlayer.position + Number(comandList[1]));
         break;
     case "volume":
-        console.log("before" + mediaPlayer.volume);
-        mediaPlayer.volume += Number(comandList[1]);
-        console.log("after" + mediaPlayer.volume);
+        var newVolume = mediaPlayer.volume + Number(comandList[1]);
+        if (newVolume > 1)
+            mediaPlayer.volume = 1;
+        else
+            if (newVolume < 0)
+                mediaPlayer.volume = 0;
+        else
+                mediaPlayer.volume = newVolume;
         break;
     default:
         break;

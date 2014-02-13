@@ -10,8 +10,8 @@ MenuBar {
     signal chooseColor
     signal about
     signal help
-    signal handControl(var b)
-    signal camera(var b)
+    signal handControl(var checked)
+    signal camera(var checked)
 
     function initColors(text){
         Logic.updateColors(colorMenu, text);

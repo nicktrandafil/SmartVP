@@ -29,7 +29,6 @@ ApplicationWindow {
     Player {
         id: player
         anchors {fill: parent; leftMargin: 5; rightMargin: 5; topMargin: 5; bottomMargin: 5}
-        systemPallete: systemPallete
         onAddFiles: fileDialog.visible = true
     }
     FileDialog {
@@ -50,10 +49,6 @@ ApplicationWindow {
     ColorSettings {
         id: colorSettings
         onInitColors: menuBar.initColors(text)
-    }
-
-    SystemPalette {
-        id: systemPallete
     }
     Component.onCompleted: {
         Logic.mainWindow = mainWindow;

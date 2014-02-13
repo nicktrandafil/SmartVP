@@ -10,7 +10,7 @@ Window {
     minimumHeight: 250
     minimumWidth: 600
     modality: Qt.ApplicationModal
-    title: qsTr("Настройки цвета")
+    title: qsTr("Настройка цвета")
 
     property alias minH: minHSlider.value
     property alias minS: minSSlider.value
@@ -37,7 +37,7 @@ Window {
     }
     Label {
         id: minHValue
-        anchors {verticalCenter: minHLabel.verticalCenter; right: parent.right; margins: 10}
+        anchors {verticalCenter: minHLabel.verticalCenter; right: parent.right; margins: 10;}
         height: minHLabel.height
         width: minHLabel.width
         text: minHSlider.value

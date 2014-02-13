@@ -9,13 +9,11 @@
 #include <QDebug>
 #endif
 
-//Hand class
 Stick::Stick()
 {
 #ifdef QT_DEBUG
     qDebug() << "Stick created";
 #endif
-    // nothing to do
 }
 
 Stick::~Stick()
@@ -24,41 +22,20 @@ Stick::~Stick()
     qDebug() << "Stick deleted";
 #endif
 }
-cv::Point Stick::top() const
-{
-    return m_top;
-}
 
-void Stick::setTop(const cv::Point &top)
-{
-    m_top = top;
-}
-cv::Point Stick::bottom() const
-{
-    return m_bottom;
-}
+cv::Point Stick::top() const {return m_top;}
+void Stick::setTop(const cv::Point &top) {m_top = top;}
+cv::Point Stick::bottom() const {return m_bottom;}
+void Stick::setBottom(const cv::Point &bottom) {m_bottom = bottom;}
 
-void Stick::setBottom(const cv::Point &bottom)
-{
-    m_bottom = bottom;
-}
-
-// MotionDetector class
 MotionDetector::MotionDetector(QObject *parent) :
     QObject(parent),
     m_state(ST_WAITING),
     m_arAtThreshold(1000),
-    m_framesPerSec(1000 / (1000 / 10/*FPS*/)),
-    m_obserTimId(-1),
-    m_heavyFilter(false),
+    m_observeTimInterval(1000 / 30/*FPS*/),
+    m_observeTimId(-1),
     m_showImage(false),
-    m_camId(0),
-    m_maxH(0),
-    m_maxS(0),
-    m_maxV(0),
-    m_minH(0),
-    m_minS(0),
-    m_minV(0)
+    m_camId(0), m_maxH(0), m_maxS(0), m_maxV(0), m_minH(0), m_minS(0), m_minV(0)
 {
 #ifdef QT_DEBUG
     qDebug() << "MotionDetector created";
@@ -76,12 +53,12 @@ void MotionDetector::beginSession(bool begin)
 {
     if (begin){
         m_cap.open(m_camId);
-        m_obserTimId = startTimer(m_framesPerSec);
+        m_observeTimId = startTimer(m_observeTimInterval);
     } else{
-        if (m_obserTimId != -1)
-            killTimer(m_obserTimId);
-        m_obserTimId = -1;
-        // убираем за собой
+        // убираемся за собой
+        if (m_observeTimId != -1)
+            killTimer(m_observeTimId);
+        m_observeTimId = -1;
         m_pointSeries.clear();
         m_cap.release();
         m_frame.release();
@@ -96,7 +73,6 @@ void MotionDetector::observCam()
     m_cap >> m_frame;
     filterIm();
     detectStick();
-    drawStick(m_frame);
     drawStick(m_binIm);
     showIms();
 }
@@ -107,10 +83,11 @@ void MotionDetector::setMinV(int v) {m_minV = v;}
 void MotionDetector::setMaxH(int v) {m_maxH = v;}
 void MotionDetector::setMaxS(int v) {m_maxS = v;}
 void MotionDetector::setMaxV(int v) {m_maxV = v;}
-void MotionDetector::setHeavyFilter(bool v) {m_heavyFilter = v;}
 
 void MotionDetector::setShowImage(bool show)
 {
+    // Создается окно в motionWrapper, в основном потоке, т.к. gui должно работать в основном потоке.
+    // Здесь окна только уничтожаются.
     m_showImage = show;
     if (!show)
         cv::destroyWindow("bin");
@@ -119,7 +96,7 @@ void MotionDetector::setShowImage(bool show)
 void MotionDetector::resetCam(int camId)
 {
     bool wasObserving = false;
-    if (m_obserTimId != -1){ // Если ведется наблюдение прекращаем
+    if (m_observeTimId != -1){ // Если ведется, то наблюдение прекращаем
         beginSession(false);
         wasObserving = true;
     }
@@ -133,18 +110,8 @@ void MotionDetector::filterIm()
     m_hsv = m_frame.clone();
     m_binIm = m_frame.clone();
     cv::cvtColor(m_frame, m_hsv, CV_RGB2HSV);
-
     // работаем с m_hsv изображением, в результате получаем m_binIm
     cv::inRange(m_hsv, cv::Scalar(m_minH, m_minS, m_minV), cv::Scalar(m_maxH, m_maxS, m_maxV), m_binIm);
-
-    if (m_heavyFilter){
-        cv::Mat erodeElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
-        cv::Mat dilateElement = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(8, 8));
-        cv::erode(m_binIm, m_binIm, erodeElement);
-        cv::erode(m_binIm, m_binIm, erodeElement);
-        cv::dilate(m_binIm, m_binIm, dilateElement);
-        cv::dilate(m_binIm, m_binIm, dilateElement);
-    }
 }
 
 void MotionDetector::detectStick()
@@ -160,7 +127,8 @@ void MotionDetector::detectStick()
         if(cv::contourArea(m_contours[i]) < m_arAtThreshold)
             continue;
 
-        // находим концы карандаша
+        // находим концы карандаша. top - это тот коненец, который всегда выше. код ниже работат(сам не знаю как),
+        // лучше не лезть.
         m_stickRect = cv::minAreaRect(m_contours[i]);
         cv::Point2f vertices[4];
         cv::Point top;
@@ -186,15 +154,16 @@ void MotionDetector::detectStick()
         if (!stickFound){
             m_state = ST_WAITING;
             m_pointSeries.clear();
-            break;
-        }
-        m_pointSeries.append(QPair<double, double>(m_stick.top().x, m_stick.top().y));
-        if (m_pointSeries.size() >= 10){
-            m_actionPack = m_pSeriesAnaliser.analize(m_pointSeries);
-            if (!m_actionPack.isEmpty()){
-                emit sendAction(m_actionPack);
+        } else
+        {
+            m_pointSeries.append(QPair<double, double>(m_stick.top().x, m_stick.top().y));
+            if (m_pointSeries.size() >= 10){
+                m_actionPack = SeriesAnaliser::analize(m_pointSeries);
+                if (!m_actionPack.isEmpty()){
+                    emit sendAction(m_actionPack);
+                }
+                m_pointSeries.clear();
             }
-            m_pointSeries.clear();
         }
         break;
     case ST_WAITING:
@@ -202,11 +171,13 @@ void MotionDetector::detectStick()
         break;
     }
 }
-void MotionDetector::showIms()
+
+void MotionDetector::showIms() const
 {
     if (m_showImage)
         cv::imshow("bin", m_binIm);
 }
+
 void MotionDetector::drawStick(cv::Mat &im)
 {
     cv::Point2f vertices[4];
@@ -219,6 +190,7 @@ void MotionDetector::drawStick(cv::Mat &im)
     cv::line(im, m_stick.top(), m_stick.bottom(), cv::Scalar(0, 0, 255));
 
 }
+
 double MotionDetector::lineLength(const cv::Point2f &p1, const cv::Point2f &p2) const
 {
     return qSqrt(qPow(p1.x - p2.x, 2) + qPow(p1.y - p2.y, 2));
@@ -230,7 +202,9 @@ void MotionDetector::timerEvent(QTimerEvent *event)
     observCam();
 }
 
-SeriesAnaliser::SeriesAnaliser(QObject *parent) : QObject(parent), m_framesPerSec(30)
+double SeriesAnaliser::s_fps = 1000 / (1000 / 30);
+QString SeriesAnaliser::s_actionPack;
+SeriesAnaliser::SeriesAnaliser(QObject *parent) : QObject(parent)
 {
 #ifdef QT_DEBUG
     qDebug() << "SeriesAnaliser created";
@@ -246,12 +220,12 @@ SeriesAnaliser::~SeriesAnaliser()
 
 QString SeriesAnaliser::analize(const QVector<QPair<double, double> > &source)
 {
-    m_actionPack.clear();
+    s_actionPack.clear();
     if (linerCheck(source)){
-        return m_actionPack;
+        return s_actionPack;
     }
 
-    return m_actionPack;
+    return s_actionPack;
 }
 
 bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
@@ -316,7 +290,7 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
         return false;
 
     // вычисление скорости
-    double msInFrame = 1000 / m_framesPerSec;
+    double msInFrame = 1000 / s_fps;
     double dTime = msInFrame * count;   // ms
     double dDistance;                   // px
     double speed = 0;  /*px per ser*/
@@ -340,21 +314,21 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
         // Переключение
         if (a < 0){
             // следующая дорожка
-            m_actionPack = "next";
+            s_actionPack = "next";
         } else{
             if (speed < 0)
-                m_actionPack = "play";
+                s_actionPack = "play";
             else
                 // предыдущая дорожка
-                m_actionPack = "previous";
+                s_actionPack = "previous";
         }
     } else
         if (qAbs(a) < 0.3)
         {
-            m_actionPack = QString("rewind %1").arg(speed * -30000);
+            s_actionPack = QString("rewind %1").arg(speed * -30000);
         } else
             if (qAbs(a) > 3){
-                m_actionPack = QString("volume %1").arg(speed * -1);
+                s_actionPack = QString("volume %1").arg(speed * -1);
             } else
                 return false;
 
@@ -363,13 +337,3 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
 /*Протокол общения
  * next, previous, play, rewind delta, volume delta
  */
-
-double SeriesAnaliser::deltaTime() const
-{
-    return m_framesPerSec;
-}
-
-void SeriesAnaliser::setDeltaTime(double framesPerSec)
-{
-    m_framesPerSec = framesPerSec;
-}
