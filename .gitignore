@@ -40,3 +40,6 @@ resources/minimal-media-player-icons.jpg
 # Файлы убунту
 .fuse_hidden*
 
+/qml/QtQuick/
+/qml/QtQuick.2/
+/qml/QtMultimedia/
