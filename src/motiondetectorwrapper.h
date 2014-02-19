@@ -17,6 +17,7 @@ public:
 
     Q_INVOKABLE void beginSession(bool begin);
     Q_INVOKABLE void showDetection(bool show);
+    Q_INVOKABLE void resetCam(int camId);
 
     MotionDetector *motionDetector() const;
     void setMotionDetector(MotionDetector *motionDetector);

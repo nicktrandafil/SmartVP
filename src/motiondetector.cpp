@@ -280,13 +280,20 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
     qDebug() << dif;
 #endif
 
-    // если а > 3, то это, сокорее всего, вертикальная линия
-    // если погрешность больше 70, то это, скорее всего, случайное движение
-    // если 0.5 < a < 1.5, то это, скорее всего, косая линия
+    // если а > vBorder, то это, сокорее всего, вертикальная линия
+    // если погрешность больше epsilan, то это, скорее всего, случайное движение
+    // если oblMovMin < a < oblMovMax, то это, скорее всего, косая линия
     // если скорость больше 0.6, то это, скорее всего, случайное движеие
+    // если a < horMov, то это, скорее всего, горизонтально
+
+    int vBorder = 3;
+    int epsilan = 50;
+    double oblMovMin = 0.5;
+    double oblMovMax = 1.5;
+    double horMov = 0.3;
 
     // Если погрешность очень большая, то выход
-    if (qAbs(a) < 3 && dif > 70)
+    if (qAbs(a) < vBorder && dif > epsilan)
         return false;
 
     // вычисление скорости
@@ -294,7 +301,7 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
     double dTime = msInFrame * count;   // ms
     double dDistance;                   // px
     double speed = 0;  /*px per ser*/
-    if (qAbs(a) < 3)
+    if (qAbs(a) < vBorder)
         dDistance = x[count - 1] - x[0];            // если вертикальная линия
     else
         dDistance = y[count -1] - y[0];
@@ -310,7 +317,7 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
         return false;
 
     // отправка пакета
-    if (qAbs(a) > 0.5 && qAbs(a) < 1.5){
+    if (qAbs(a) > oblMovMin && qAbs(a) < oblMovMax){
         // Переключение
         if (a < 0){
             // следующая дорожка
@@ -323,11 +330,11 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
                 s_actionPack = "previous";
         }
     } else
-        if (qAbs(a) < 0.3)
+        if (qAbs(a) < horMov)
         {
             s_actionPack = QString("rewind %1").arg(speed * -30000);
         } else
-            if (qAbs(a) > 3){
+            if (qAbs(a) > vBorder){
                 s_actionPack = QString("volume %1").arg(speed * -1);
             } else
                 return false;

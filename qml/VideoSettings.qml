@@ -6,7 +6,7 @@ import "Logic.js" as Logic
 Window {
     id: window
     minimumHeight: 100
-    minimumWidth: 300
+    minimumWidth: 400
     modality: Qt.ApplicationModal
     title: qsTr("Настройки")
 
@@ -19,9 +19,8 @@ Window {
     }
     ComboBox {
         id: camBox
-        anchors {margins: 10; verticalCenter: camLabel.verticalCenter; left: camLabel.right}
-        width: 100
-        height: 20
+        anchors {margins: 10; verticalCenter: camLabel.verticalCenter; left: camLabel.right; right: parent.right}
+        height: 30
         model: camModel
     }
     ListModel {
@@ -30,12 +29,11 @@ Window {
             text: ""
         }
     }
-
     Button {
         id: ok
         anchors {margins: 10; bottom: parent.bottom; right: cencel.left}
         text: "Ok"
-        onClicked: { Logic.md.motionDetector.resetCam(camModel.get(camBox.currentIndex).device); window.visible = false}
+        onClicked: { Logic.md.resetCam(camModel.get(camBox.currentIndex).device); window.visible = false}
     }
 
     Button {
@@ -46,7 +44,7 @@ Window {
     }
 
     function initModel(){
-        for (var i = 0; i < Logic.helper.devices.length / 2; i += 2)
+        for (var i = 0; i <= Logic.helper.devices.length / 2; i += 2)
             camModel.append({"text": Logic.helper.devices[i], "device": Logic.helper.devices[i + 1]})
         camBox.currentIndex = 1;
         camModel.remove(0);

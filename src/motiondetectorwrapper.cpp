@@ -44,6 +44,11 @@ void MotionDetectorWrapper::showDetection(bool show)
     QMetaObject::invokeMethod(m_motionDetector, "setShowImage", Q_ARG(bool, show));
 }
 
+void MotionDetectorWrapper::resetCam(int camId)
+{
+    QMetaObject::invokeMethod(m_motionDetector, "resetCam", Q_ARG(int, camId));
+}
+
 MotionDetector *MotionDetectorWrapper::motionDetector() const
 {
     return m_motionDetector;
