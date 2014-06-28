@@ -1,28 +1,22 @@
 #include "helper.h"
-#include <QFile>
-#include <QFileInfo>
-#include <QUrl>
-#include <QTime>
-#include <QFile>
-#include <QTextStream>
-#include <QtMultimedia/QCamera>
 
-#ifdef QT_DEBUG
-#include <QDebug>
-#endif
+#include <QtCore/QFile>
+#include <QtCore/QFileInfo>
+#include <QtCore/QUrl>
+#include <QtCore/QTime>
+#include <QtCore/QTextStream>
+#include <QtMultimedia/QCamera>
+#include <QtCore/QDebug>
 
 Helper::Helper(QObject *parent) :
     QObject(parent)
 {
-#ifdef QT_DEBUG
     qDebug() << "Helper created";
-#endif
+
     // Чтение видео форматов
     QFile file(":resources/videoFormats.txt");
     if (!file.open(QFile::ReadOnly)){
-#ifdef QT_DEBUG
         qDebug() << "Can't open the file videFormats";
-#endif
         return;
     }
     QTextStream inf(&file);
@@ -50,9 +44,7 @@ Helper::Helper(QObject *parent) :
 
 Helper::~Helper()
 {
-#ifdef QT_DEBUG
     qDebug() << "Helper deleted";
-#endif
 }
 
 bool Helper::isValidMedia(const QUrl &path) const
@@ -144,9 +136,7 @@ void Helper::updateColors(const QString &path, const QString &content)
 {
     QFile file(path);
     if (!file.open(QFile::Append)){
-#ifdef QT_DEBUG
         qDebug() << file.errorString();
-#endif
         return;
     }
     QTextStream outf(&file);

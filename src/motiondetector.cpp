@@ -1,26 +1,22 @@
 #include "motiondetector.h"
-#include <qmath.h>
-#include <QDebug>
-#include <QTime>
-#include <string>
+
+#include <QtCore/QDebug>
+#include <QtCore/QDebug>
+#include <QtCore/QTime>
+
 #include <QtQml>
 
-#ifdef QT_DEBUG
-#include <QDebug>
-#endif
+#include <qmath.h>
+#include <string>
 
 Stick::Stick()
 {
-#ifdef QT_DEBUG
     qDebug() << "Stick created";
-#endif
 }
 
 Stick::~Stick()
 {
-#ifdef QT_DEBUG
     qDebug() << "Stick deleted";
-#endif
 }
 
 cv::Point Stick::top() const {return m_top;}
@@ -37,16 +33,12 @@ MotionDetector::MotionDetector(QObject *parent) :
     m_showImage(false),
     m_camId(0), m_maxH(0), m_maxS(0), m_maxV(0), m_minH(0), m_minS(0), m_minV(0)
 {
-#ifdef QT_DEBUG
     qDebug() << "MotionDetector created";
-#endif
 }
 
 MotionDetector::~MotionDetector()
 {
-#ifdef QT_DEBUG
     qDebug() << "MotionDetecot deleted";
-#endif
 }
 
 void MotionDetector::beginSession(bool begin)
@@ -206,16 +198,12 @@ double SeriesAnaliser::s_fps = 1000 / (1000 / 30);
 QString SeriesAnaliser::s_actionPack;
 SeriesAnaliser::SeriesAnaliser(QObject *parent) : QObject(parent)
 {
-#ifdef QT_DEBUG
     qDebug() << "SeriesAnaliser created";
-#endif
 }
 
 SeriesAnaliser::~SeriesAnaliser()
 {
-#ifdef QT_DEBUG
     qDebug() << "SeriesAnaliser deleted";
-#endif
 }
 
 QString SeriesAnaliser::analize(const QVector<QPair<double, double> > &source)
@@ -275,10 +263,8 @@ bool SeriesAnaliser::linerCheck(const QVector<QPair<double, double> > &source)
     if (a == 0)
         a = 10;
 
-#ifdef QT_DEBUG
     qDebug() << QString("%1x+%2").arg(a).arg(b);
     qDebug() << dif;
-#endif
 
     // если а > vBorder, то это, сокорее всего, вертикальная линия
     // если погрешность больше epsilan, то это, скорее всего, случайное движение

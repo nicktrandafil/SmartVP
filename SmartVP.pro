@@ -6,11 +6,6 @@ DEPLOYMENTFOLDERS = folder_01
 
 QT += quick qml multimedia widgets
 
-MOC_DIR = notApp
-OBJECTS_DIR = notApp
-RCC_DIR = notApp
-UI_DIR = notApp
-
 SOURCES += src/main.cpp \
     src/helper.cpp \
     src/motiondetector.cpp \
@@ -51,15 +46,13 @@ OTHER_FILES += \
 linux {
     CONFIG(debug, debug|release) {
         DESTDIR = $$PWD
-        INCLUDEPATH += /home/nicktrandafil/Develop/opencv2.4.8
-        LIBS += -L/home/nicktrandafil/Develop/opencv2.4.8/lib \
+        LIBS += -L/home/nicktrandafil/Develop/opencv_debug/lib \
             -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d \
             -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -lopencv_flann -lopencv_nonfree
-    }
-    CONFIG(release, debug|release) {
+    } else
+    {
         DESTDIR = $$PWD
-        INCLUDEPATH += /home/nicktrandafil/Develop/opencv2.4.8_release
-        LIBS += -L/home/nicktrandafil/Develop/opencv2.4.8_release/lib \
+        LIBS += -L/home/nicktrandafil/Develop/opencv_release/lib \
             -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d \
             -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -lopencv_flann -lopencv_nonfree
     }

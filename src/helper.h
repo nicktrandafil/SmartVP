@@ -1,10 +1,10 @@
 #ifndef HELPER_H
 #define HELPER_H
 
-#include <QObject>
-#include <QStringList>
-#include <QHash>
-#include <QVariant>
+#include <QtCore/QObject>
+#include <QtCore/QStringList>
+#include <QtCore/QHash>
+#include <QtCore/QVariant>
 
 
 class QGraphicsObject;

@@ -1,9 +1,11 @@
 #ifndef MOTIONDETECTOR_H
 #define MOTIONDETECTOR_H
 
-#include <QObject>
-#include <QVector>
+#include <QtCore/QObject>
+#include <QtCore/QVector>
+
 #include <vector>
+
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 

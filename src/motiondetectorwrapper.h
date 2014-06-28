@@ -1,7 +1,7 @@
 #ifndef MOTIONDETECTORWRAPPER_H
 #define MOTIONDETECTORWRAPPER_H
 
-#include <QObject>
+#include <QtCore/QObject>
 
 class QThread;
 class MotionDetector;

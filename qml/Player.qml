@@ -20,9 +20,10 @@ Item {
             id: videoOutputAndControls
             Item {
                 id: itemForBenweenMargin
-                anchors {fill: parent; rightMargin: 5}
+                anchors { fill: parent; rightMargin: 5 }
                 MediaPlayer {
                     id: mediaPlayer
+                    onError: console.log(errorString)
                 }
                 Rectangle {
                     id: bkgd
@@ -82,8 +83,8 @@ Item {
                         width: height
                         height: previdousButton.height
                         iconSource: mediaPlayer.playbackState == 2 ? "qrc:///resources/icons/Play.png" :
-                                                                mediaPlayer.playbackState == 1 ? "qrc:///resources/icons/Pause.png" :
-                                                                                    "qrc:///resources/icons/Play.png"
+                                                                     mediaPlayer.playbackState == 1 ? "qrc:///resources/icons/Pause.png" :
+                                                                                                      "qrc:///resources/icons/Play.png"
                         onClicked: Logic.playMedia()
                     }
                     Button {
@@ -116,7 +117,7 @@ Item {
                                 PropertyChanges {
                                     target: itemForBenweenMargin
                                     parent: fullScreenWindowContent
-                                    anchors.fill: parent
+                                    //anchors.fill: parent
                                     anchors.rightMargin: 0
                                 }
                                 PropertyChanges {
@@ -126,14 +127,15 @@ Item {
                                 PropertyChanges {
                                     target: bkgd
                                     anchors.bottomMargin: 0
-                                    anchors.fill: parent
+                                    //anchors.fill: parent
                                 }
                             },
                             State {
                                 name: "MinScreen"
                                 when: !fullScreenWindow.visible
                                 PropertyChanges
-                                {target: fullScreenButton
+                                {
+                                    target: fullScreenButton
                                     iconSource: "qrc:///resources/icons/FullScreen.png"
                                 }
                             }
@@ -152,7 +154,7 @@ Item {
                         Connections {
                             target: mediaPlayer
                             onPositionChanged: duratinInfo.text = Logic.helper.duration(mediaPlayer.position / 1000,
-                                                                                  mediaPlayer.duration / 1000)
+                                                                                        mediaPlayer.duration / 1000)
                         }
                     }
                     Button {
@@ -164,10 +166,10 @@ Item {
                         height: width
                         iconSource: "qrc:///resources/icons/Volume.png"
                         onHoveredChanged: if (hovered) {volumeSlider.visible = true} else
-                                        {volumeSlider.visible = false}
+                                          {volumeSlider.visible = false}
                         onClicked: if (state == "Mute")
                                        volumeSlider.value = temp;
-                        else
+                                   else
                                    {
                                        temp = volumeSlider.value;
                                        volumeSlider.value = 0;
@@ -266,7 +268,7 @@ Item {
                     height: 20
                     Rectangle {
                         id: itemBkgd
-                        anchors {margins: 1; fill: parent}
+                        anchors { margins: 1; fill: parent }
                         radius: height / 4.
                         color: listView.indexAt(itself.x, itself.y) == listView.playIndex ? "#a2ffa2" : "white";
                         Text {
@@ -287,7 +289,7 @@ Item {
                 Keys.onReturnPressed: {listView.playIndex = listView.currentIndex}
                 Keys.onSpacePressed: if (mediaPlayer.playbackState == 1)
                                          mediaPlayer.pause();
-                else
+                                     else
                                          mediaPlayer.play()
                 DropArea {
                     id: dropArea
