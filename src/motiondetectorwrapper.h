@@ -3,6 +3,8 @@
 
 #include <QtCore/QObject>
 
+#include <opencv/cv.h>
+
 class QThread;
 class MotionDetector;
 
@@ -26,10 +28,12 @@ signals:
     void motionDetectorChanged();
     void sendAction(const QString & action);
 
-public slots:
 private:
+    void drawIm(const cv::Mat &im);
+
     MotionDetector *m_motionDetector;
     QThread *m_thread;
+    bool m_showDetection;
 };
 
 #endif // MOTIONDETECTORWRAPPER_H

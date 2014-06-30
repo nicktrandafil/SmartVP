@@ -1,9 +1,9 @@
-import QtQuick 2.0
-import QtQuick.Window 2.1
-import QtQuick.Controls 1.1
-import QtQuick.Controls.Styles 1.1
+import QtQuick 2.3
+import QtQuick.Window 2.0
+import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.2
 import "Logic.js" as Logic
-import QtQuick.Dialogs 1.1
+import QtQuick.Dialogs 1.2
 
 Window {
     id: window

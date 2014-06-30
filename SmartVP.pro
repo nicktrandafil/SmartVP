@@ -34,7 +34,8 @@ for(deploymentfolder, DEPLOYMENTFOLDERS) {
 HEADERS += \
     src/helper.h \
     src/motiondetector.h \
-    src/motiondetectorwrapper.h
+    src/motiondetectorwrapper.h \
+    src/handbag.h
 
 OTHER_FILES += \
     resources/About.txt \

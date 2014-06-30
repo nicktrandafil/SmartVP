@@ -9,28 +9,12 @@
 #include <qmath.h>
 #include <string>
 
-Stick::Stick()
-{
-    qDebug() << "Stick created";
-}
-
-Stick::~Stick()
-{
-    qDebug() << "Stick deleted";
-}
-
-cv::Point Stick::top() const {return m_top;}
-void Stick::setTop(const cv::Point &top) {m_top = top;}
-cv::Point Stick::bottom() const {return m_bottom;}
-void Stick::setBottom(const cv::Point &bottom) {m_bottom = bottom;}
-
 MotionDetector::MotionDetector(QObject *parent) :
     QObject(parent),
     m_state(ST_WAITING),
     m_arAtThreshold(1000),
     m_observeTimInterval(1000 / 30/*FPS*/),
     m_observeTimId(-1),
-    m_showImage(false),
     m_camId(0), m_maxH(0), m_maxS(0), m_maxV(0), m_minH(0), m_minS(0), m_minV(0)
 {
     qDebug() << "MotionDetector created";
@@ -53,37 +37,30 @@ void MotionDetector::beginSession(bool begin)
         m_observeTimId = -1;
         m_pointSeries.clear();
         m_cap.release();
-        m_frame.release();
-        m_hsv.release();
-        m_binIm.release();
-        m_contours.clear();
     }
 }
 
 void MotionDetector::observCam()
 {
-    m_cap >> m_frame;
-    filterIm();
-    detectStick();
-    drawStick(m_binIm);
-    showIms();
+    cv::Mat frame;
+    m_cap >> frame;
+    cv::Mat bin = filterIm(frame);
+
+    Stick stick = detectStick(bin);
+    if (stick.isValid())
+    {
+        accumulator(stick.getTop());
+        drawStick(bin, stick);
+    }
+    emit showIm(bin);
 }
 
-void MotionDetector::setMinH(int v) {m_minH = v;}
-void MotionDetector::setMinS(int v) {m_minS = v;}
-void MotionDetector::setMinV(int v) {m_minV = v;}
-void MotionDetector::setMaxH(int v) {m_maxH = v;}
-void MotionDetector::setMaxS(int v) {m_maxS = v;}
-void MotionDetector::setMaxV(int v) {m_maxV = v;}
-
-void MotionDetector::setShowImage(bool show)
-{
-    // Создается окно в motionWrapper, в основном потоке, т.к. gui должно работать в основном потоке.
-    // Здесь окна только уничтожаются.
-    m_showImage = show;
-    if (!show)
-        cv::destroyWindow("bin");
-}
+void MotionDetector::setMinH(int v) { m_minH = v; }
+void MotionDetector::setMinS(int v) { m_minS = v; }
+void MotionDetector::setMinV(int v) { m_minV = v; }
+void MotionDetector::setMaxH(int v) { m_maxH = v; }
+void MotionDetector::setMaxS(int v) { m_maxS = v; }
+void MotionDetector::setMaxV(int v) { m_maxV = v; }
 
 void MotionDetector::resetCam(int camId)
 {
@@ -97,35 +74,42 @@ void MotionDetector::resetCam(int camId)
         beginSession(true);
 }
 
-void MotionDetector::filterIm()
+cv::Mat MotionDetector::filterIm(const cv::Mat &frame)
 {
-    m_hsv = m_frame.clone();
-    m_binIm = m_frame.clone();
-    cv::cvtColor(m_frame, m_hsv, CV_RGB2HSV);
+    cv::Mat hsv = frame.clone();
+    cv::Mat binIm = frame.clone();
+
+    cv::cvtColor(frame, hsv, CV_RGB2HSV);
+
     // работаем с m_hsv изображением, в результате получаем m_binIm
-    cv::inRange(m_hsv, cv::Scalar(m_minH, m_minS, m_minV), cv::Scalar(m_maxH, m_maxS, m_maxV), m_binIm);
+    cv::inRange(hsv, cv::Scalar(m_minH, m_minS, m_minV), cv::Scalar(m_maxH, m_maxS, m_maxV), binIm);
+
+    return binIm;
 }
 
-void MotionDetector::detectStick()
+Stick MotionDetector::detectStick(const cv::Mat &binIm)
 {
-    m_contours.clear();
-    cv::findContours(m_binIm.clone(), m_contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-    if (m_contours.empty())
-        return;
+    std::vector<std::vector<cv::Point> > contours;
+
+    cv::findContours(binIm.clone(), contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+    if (contours.empty())
+        return Stick();
+
     bool stickFound = false;
-    for(int i = 0; i < m_contours.size(); ++i)
+    cv::Point top;          // Веришины карандаша
+    cv::Point bottom;
+
+    for(int i = 0; i < contours.size() && !stickFound; ++i)
     {
         // если объект очень маленький, то пропускаем его
-        if(cv::contourArea(m_contours[i]) < m_arAtThreshold)
+        if(cv::contourArea(contours[i]) < m_arAtThreshold)
             continue;
 
         // находим концы карандаша. top - это тот коненец, который всегда выше. код ниже работат(сам не знаю как),
         // лучше не лезть.
-        m_stickRect = cv::minAreaRect(m_contours[i]);
+        cv::RotatedRect stickRect = cv::minAreaRect(contours[i]);
         cv::Point2f vertices[4];
-        cv::Point top;
-        cv::Point bottom;
-        m_stickRect.points(vertices);
+        stickRect.points(vertices);
         if (lineLength(vertices[0], vertices[1]) > lineLength(vertices[1], vertices[2])){
             top = cv::Point((vertices[1].x + vertices[2].x) / 2., (vertices[1].y + vertices[2].y) / 2.);
             bottom = cv::Point((vertices[0].x + vertices[3].x) / 2., (vertices[0].y + vertices[3].y) / 2.);
@@ -135,63 +119,46 @@ void MotionDetector::detectStick()
         }
         if (top.y > bottom.y)
             qSwap(top, bottom);
-        m_stick.setTop(top);
-        m_stick.setBottom(bottom);
         stickFound = true;
     }
+    if (stickFound)
+        return Stick(top, bottom);
+    else
+        return Stick();
+}
 
-    // проверяем состояние
-    switch (m_state){
-    case ST_OBSERVING:
-        if (!stickFound){
-            m_state = ST_WAITING;
-            m_pointSeries.clear();
-        } else
-        {
-            m_pointSeries.append(QPair<double, double>(m_stick.top().x, m_stick.top().y));
-            if (m_pointSeries.size() >= 10){
-                m_actionPack = SeriesAnaliser::analize(m_pointSeries);
-                if (!m_actionPack.isEmpty()){
-                    emit sendAction(m_actionPack);
-                }
-                m_pointSeries.clear();
-            }
+void MotionDetector::accumulator(const cv::Point &top)
+{
+    m_pointSeries.append(QPair<double, double>(top.x, top.y));
+    if (m_pointSeries.size() >= 10){
+        QString actionPack = SeriesAnaliser::analize(m_pointSeries);
+        if (!actionPack.isEmpty()){
+            emit sendAction(actionPack);
         }
-        break;
-    case ST_WAITING:
-        m_state = ST_OBSERVING;
-        break;
+        m_pointSeries.clear();
     }
 }
 
-void MotionDetector::showIms() const
-{
-    if (m_showImage)
-        cv::imshow("bin", m_binIm);
-}
-
-void MotionDetector::drawStick(cv::Mat &im)
+void MotionDetector::drawStick(cv::Mat &im, const Stick &stick)
 {
     cv::Point2f vertices[4];
-    m_stickRect.points(vertices);
     for (int i = 0; i < 4; i++){
         cv::line(im, vertices[i], vertices[(i+1)%4], cv::Scalar(0,255,0));
     }
-    cv::circle(im, m_stick.top(), 10, cv::Scalar(0, 0, 255));
-    cv::circle(im, m_stick.bottom(), 10, cv::Scalar(0, 0, 255));
-    cv::line(im, m_stick.top(), m_stick.bottom(), cv::Scalar(0, 0, 255));
-
-}
-
-double MotionDetector::lineLength(const cv::Point2f &p1, const cv::Point2f &p2) const
-{
-    return qSqrt(qPow(p1.x - p2.x, 2) + qPow(p1.y - p2.y, 2));
+    cv::circle(im, stick.getTop(), 10, cv::Scalar(0, 0, 255));
+    cv::circle(im, stick.getBottom(), 10, cv::Scalar(0, 0, 255));
+    cv::line(im, stick.getTop(), stick.getBottom(), cv::Scalar(0, 0, 255));
 }
 
 void MotionDetector::timerEvent(QTimerEvent *event)
 {
-    Q_UNUSED(event);
-    observCam();
+    if (event->timerId() == m_observeTimId)
+        observCam();
+}
+
+double MotionDetector::lineLength(const cv::Point2f & p1, const cv::Point2f & p2) const
+{
+    return qSqrt(qPow(p1.x - p2.x, 2) + qPow(p1.y - p2.y, 2));
 }
 
 double SeriesAnaliser::s_fps = 1000 / (1000 / 30);

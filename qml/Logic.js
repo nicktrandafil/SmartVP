@@ -9,7 +9,6 @@ var messageBox;
 var helper;
 var md;
 var colorSettings;
-//var
 
 function addFiles(newFile){
     if (newFile == null)

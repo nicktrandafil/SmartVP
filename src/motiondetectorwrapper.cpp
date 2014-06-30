@@ -8,11 +8,16 @@
 MotionDetectorWrapper::MotionDetectorWrapper(QObject *parent) :
     QObject(parent),
     m_motionDetector(new MotionDetector),
-    m_thread(new QThread)
+    m_thread(new QThread),
+    m_showDetection(false)
 {
+    qRegisterMetaType<cv::Mat>("cv::Mat");
+
     qDebug() << "MotionDetecotWrapper created";
+
     connect(m_motionDetector, SIGNAL(sendAction(QString)), SIGNAL(sendAction(QString)));
     connect(m_thread, SIGNAL(finished()), m_motionDetector, SLOT(deleteLater()));
+    connect(m_motionDetector, &MotionDetector::showIm, this, &MotionDetectorWrapper::drawIm, Qt::QueuedConnection);
 
     m_motionDetector->moveToThread(m_thread);
     m_thread->start();
@@ -36,7 +41,9 @@ void MotionDetectorWrapper::showDetection(bool show)
 {
     if (show)
         cv::namedWindow("bin");
-    QMetaObject::invokeMethod(m_motionDetector, "setShowImage", Q_ARG(bool, show));
+    else
+        cv::destroyWindow("bin");
+    m_showDetection = show;
 }
 
 void MotionDetectorWrapper::resetCam(int camId)
@@ -53,5 +60,11 @@ void MotionDetectorWrapper::setMotionDetector(MotionDetector *motionDetector)
 {
     m_motionDetector = motionDetector;
     emit motionDetectorChanged();
+}
+
+void MotionDetectorWrapper::drawIm(const cv::Mat &im)
+{
+    if (m_showDetection)
+        cv::imshow("bin", im);
 }
 

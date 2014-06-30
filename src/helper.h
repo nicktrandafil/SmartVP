@@ -23,7 +23,10 @@ public:
     Q_INVOKABLE static QString readFile(const QString & path);
     Q_INVOKABLE static QStringList readColors(const QString &path);
     Q_INVOKABLE static void updateColors(const QString &path, const QString &content);
+
+private:
     const QStringList devices() const;
+
 private:
     QStringList m_videoFormats;
     QStringList m_devices;

@@ -1,6 +1,6 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.1
-import QtQuick.Dialogs 1.1
+import QtQuick 2.3
+import QtQuick.Controls 1.2
+import QtQuick.Dialogs 1.2
 import "Logic.js" as Logic
 import Helper 1.0
 import "."
@@ -10,7 +10,7 @@ ApplicationWindow {
     visible: true
     height: Settings.mainWindowHeight
     width: Settings.mainWindowWidth
-    onClosing: {Logic.quit(); close.accepted = false}
+    onClosing: { Logic.quit(); close.accepted = false; }
     // Белый фон
     Rectangle {
         anchors.fill: parent
@@ -21,14 +21,14 @@ ApplicationWindow {
         onQuit: Logic.quit()
         onOpenVideoSettings: videoSettings.visible = true
         onChooseColor: colorSettings.visible = true
-        onAbout: {Logic.information(qsTr("О программе"), Logic.helper.readFile(":resources/About.txt"))}
-        onHelp: {Logic.information(qsTr("Помощь"), Logic.helper.readFile(":resources/Help.txt"))}
+        onAbout: { Logic.information(qsTr("О программе"), Logic.helper.readFile(":resources/About.txt")); }
+        onHelp: { Logic.information(qsTr("Помощь"), Logic.helper.readFile(":resources/Help.txt")); }
         onHandControl: Logic.md.beginSession(checked)
         onCamera: Logic.md.showDetection(checked)
     }
     Player {
         id: player
-        anchors {fill: parent; leftMargin: 5; rightMargin: 5; topMargin: 5; bottomMargin: 5}
+        anchors { fill: parent; leftMargin: 5; rightMargin: 5; topMargin: 5; bottomMargin: 5 }
         onAddFiles: fileDialog.visible = true
     }
     FileDialog {
